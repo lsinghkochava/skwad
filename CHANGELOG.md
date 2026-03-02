@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.6.1] - WIP
+## [1.7.0] - WIP
 
 ### Added
-- N/A
+- Manage your bench of favorite agents and deploy them into workspaces as needed
 
 ### Changed
 - N/A
@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - Voice input: transcript loss during long dictation (Apple speech recognizer silent resets)
 
 ### Removed
-- N/A
+- Recent agents
 
 
 ## [1.6.0] - 2026-03-01
