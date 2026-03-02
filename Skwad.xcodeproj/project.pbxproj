@@ -17,6 +17,7 @@
 		49BE1929AE038865BFCD543D /* GitTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADCF18167D88BA578DBF2B2E /* GitTypes.swift */; };
 		8D03C5CA2F48A03F00CF0F07 /* CodexHookHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D03C5C92F48A03F00CF0F07 /* CodexHookHandlerTests.swift */; };
 		8D2673C92F31592C0043E3A6 /* VoiceInputManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2673C72F31592C0043E3A6 /* VoiceInputManager.swift */; };
+		AA000001 /* TranscriptAccumulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* TranscriptAccumulator.swift */; };
 		8D2673CA2F31592C0043E3A6 /* VoiceInputOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2673C82F31592C0043E3A6 /* VoiceInputOverlay.swift */; };
 		8D2673CB2F31592C0043E3A6 /* PushToTalkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2673C62F31592C0043E3A6 /* PushToTalkMonitor.swift */; };
 		8D334BC82F35104700FB0E95 /* AgentContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D334BC72F35104700FB0E95 /* AgentContextMenu.swift */; };
@@ -154,6 +155,7 @@
 		TS000033 /* AgentSheetUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100032 /* AgentSheetUITests.swift */; };
 		TS000034 /* GitPanelViewHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100033 /* GitPanelViewHelpersTests.swift */; };
 		TS000035 /* VoiceInputHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100034 /* VoiceInputHelpersTests.swift */; };
+		AA000002 /* TranscriptAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002 /* TranscriptAccumulatorTests.swift */; };
 		TS000036 /* AgentContextMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100035 /* AgentContextMenuTests.swift */; };
 		TS000037 /* RepoDiscoveryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100036 /* RepoDiscoveryServiceTests.swift */; };
 		TS000039 /* MockTerminalAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100038 /* MockTerminalAdapter.swift */; };
@@ -209,6 +211,7 @@
 		8D03C5C92F48A03F00CF0F07 /* CodexHookHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHookHandlerTests.swift; sourceTree = "<group>"; };
 		8D2673C62F31592C0043E3A6 /* PushToTalkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushToTalkMonitor.swift; sourceTree = "<group>"; };
 		8D2673C72F31592C0043E3A6 /* VoiceInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputManager.swift; sourceTree = "<group>"; };
+		AA100001 /* TranscriptAccumulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptAccumulator.swift; sourceTree = "<group>"; };
 		8D2673C82F31592C0043E3A6 /* VoiceInputOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputOverlay.swift; sourceTree = "<group>"; };
 		8D334BC72F35104700FB0E95 /* AgentContextMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMenu.swift; sourceTree = "<group>"; };
 		8D3ED4EC2F344CB70023AA53 /* MenuBarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarManager.swift; sourceTree = "<group>"; };
@@ -341,6 +344,7 @@
 		TS100032 /* AgentSheetUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSheetUITests.swift; sourceTree = "<group>"; };
 		TS100033 /* GitPanelViewHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitPanelViewHelpersTests.swift; sourceTree = "<group>"; };
 		TS100034 /* VoiceInputHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputHelpersTests.swift; sourceTree = "<group>"; };
+		AA100002 /* TranscriptAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptAccumulatorTests.swift; sourceTree = "<group>"; };
 		TS100035 /* AgentContextMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMenuTests.swift; sourceTree = "<group>"; };
 		TS100036 /* RepoDiscoveryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoDiscoveryServiceTests.swift; sourceTree = "<group>"; };
 		TS100038 /* MockTerminalAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTerminalAdapter.swift; sourceTree = "<group>"; };
@@ -421,6 +425,7 @@
 			children = (
 				8D2673C62F31592C0043E3A6 /* PushToTalkMonitor.swift */,
 				8D2673C72F31592C0043E3A6 /* VoiceInputManager.swift */,
+				AA100001 /* TranscriptAccumulator.swift */,
 				8D2673C82F31592C0043E3A6 /* VoiceInputOverlay.swift */,
 			);
 			path = Voice;
@@ -808,6 +813,7 @@
 			isa = PBXGroup;
 			children = (
 				TS100034 /* VoiceInputHelpersTests.swift */,
+				AA100002 /* TranscriptAccumulatorTests.swift */,
 			);
 			path = Voice;
 			sourceTree = "<group>";
@@ -1028,6 +1034,7 @@
 				F8001010 /* AppSettings.swift in Sources */,
 				F8001011 /* SettingsView.swift in Sources */,
 				8D2673C92F31592C0043E3A6 /* VoiceInputManager.swift in Sources */,
+				AA000001 /* TranscriptAccumulator.swift in Sources */,
 				8D2673CA2F31592C0043E3A6 /* VoiceInputOverlay.swift in Sources */,
 				8D2673CB2F31592C0043E3A6 /* PushToTalkMonitor.swift in Sources */,
 				8D7622AF2F2C67CE006B6280 /* MCPServer.swift in Sources */,
@@ -1140,6 +1147,7 @@
 				TS000034 /* GitPanelViewHelpersTests.swift in Sources */,
 				8D8C03052F54085B00A06866 /* MCPToolHandlerTests.swift in Sources */,
 				TS000035 /* VoiceInputHelpersTests.swift in Sources */,
+				AA000002 /* TranscriptAccumulatorTests.swift in Sources */,
 				TS000036 /* AgentContextMenuTests.swift in Sources */,
 				TS000037 /* RepoDiscoveryServiceTests.swift in Sources */,
 				TS000039 /* MockTerminalAdapter.swift in Sources */,
@@ -1307,7 +1315,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 90;
+				CURRENT_PROJECT_VERSION = 91;
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1339,7 +1347,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 90;
+				CURRENT_PROJECT_VERSION = 91;
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
