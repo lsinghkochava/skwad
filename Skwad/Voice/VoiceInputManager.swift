@@ -17,6 +17,9 @@ final class VoiceInputManager {
     var audioLevel: Float = 0
     var waveformSamples: [Float] = Array(repeating: 0, count: 64)
 
+    // Accumulates transcript across Apple recognition resets
+    private var transcriptAccumulator = TranscriptAccumulator()
+
     private var audioEngine: AVAudioEngine?
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
@@ -186,6 +189,7 @@ final class VoiceInputManager {
             try audioEngine.start()
             isListening = true
             transcribedText = ""
+            transcriptAccumulator.reset()
             error = nil
             audioLevel = 0
             previousSamples = Array(repeating: 0, count: sampleCount)
@@ -208,7 +212,8 @@ final class VoiceInputManager {
                 guard let self = self else { return }
 
                 if let result = result {
-                    self.transcribedText = result.bestTranscription.formattedString
+                    self.transcriptAccumulator.update(with: result.bestTranscription.formattedString)
+                    self.transcribedText = self.transcriptAccumulator.fullTranscript
                 }
 
                 if let error = error {
@@ -233,6 +238,7 @@ final class VoiceInputManager {
         recognitionRequest = nil
         recognitionTask = nil
         isListening = false
+        transcriptAccumulator.reset()
         audioLevel = 0
         previousSamples = []
         currentSamples = []

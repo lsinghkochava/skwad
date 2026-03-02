@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - WIP
+
+### Added
+- N/A
+
+### Changed
+- N/A
+
+### Fixed
+- Voice input: transcript loss during long dictation (Apple speech recognizer silent resets)
+
+### Removed
+- N/A
+
+
 ## [1.6.0] - 2026-03-01
 
 ### Added
