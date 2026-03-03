@@ -28,6 +28,7 @@ struct BenchDropdownView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .focusable(false)
 
             Divider()
                 .padding(.vertical, 4)

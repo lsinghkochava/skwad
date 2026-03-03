@@ -150,37 +150,21 @@ struct ContentView: View {
                   .foregroundColor(.secondary)
               }
 
-              VStack(spacing: 32) {
-
-                Button {
-                  showNewAgentSheet = true
-                } label: {
-                  Label("Create New Agent", systemImage: "plus")
-                    .font(.title2.weight(.semibold))
-                }
-                .buttonStyle(.borderedProminent)
-
-                HStack(spacing: 8) {
-                  ForEach(settings.benchAgents.prefix(5)) { benchAgent in
-                    Button {
-                      agentManager.addAgent(folder: benchAgent.folder, name: benchAgent.name, avatar: benchAgent.avatar, agentType: benchAgent.agentType, shellCommand: benchAgent.shellCommand)
-                    } label: {
-                      HStack(spacing: 6) {
-                        AvatarView(avatar: benchAgent.avatar, size: 20, font: .caption)
-                        Text(benchAgent.name)
-                          .font(.caption)
-                          .lineLimit(1)
-                      }
-                      .padding(.horizontal, 8)
-                      .padding(.vertical, 4)
-                      .background(Color.gray.opacity(0.2))
-                      .cornerRadius(12)
-                    }
-                    .buttonStyle(.plain)
+              SplitButton("New Agent") {
+                showNewAgentSheet = true
+              } popover: {
+                BenchDropdownView(
+                  onNewAgent: {
+                    showNewAgentSheet = true
+                  },
+                  onDeploy: { benchAgent in
+                    agentManager.deployBenchAgent(benchAgent)
                   }
-                }
-
-              }.padding(.vertical, 32)
+                )
+                .environment(agentManager)
+              }
+              .frame(width: 240)
+              .padding(.vertical, 32)
 
               VStack(spacing: 12) {
 

@@ -546,6 +546,23 @@ final class AgentManager {
         return agent.id
     }
 
+    @discardableResult
+    func deployBenchAgent(_ benchAgent: BenchAgent) -> UUID? {
+        let fileManager = FileManager.default
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: benchAgent.folder, isDirectory: &isDirectory), isDirectory.boolValue else {
+            AppSettings.shared.removeFromBench(benchAgent)
+            return nil
+        }
+        return addAgent(
+            folder: benchAgent.folder,
+            name: benchAgent.name,
+            avatar: benchAgent.avatar,
+            agentType: benchAgent.agentType,
+            shellCommand: benchAgent.shellCommand
+        )
+    }
+
     func removeAgent(_ agent: Agent) {
         // Close companions first (if this agent owns any)
         let companions = companions(of: agent.id)

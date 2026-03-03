@@ -12,7 +12,6 @@ struct SidebarView: View {
     @State private var broadcastMessage = ""
     @State private var showRestartAllConfirmation = false
     @State private var showCloseAllConfirmation = false
-    @State private var showBenchPopover = false
     @State private var draggedAgentId: UUID?
     @State private var dropTargetAgentId: UUID?
     @State private var dropPosition: DropPosition = .above
@@ -193,54 +192,19 @@ struct SidebarView: View {
                 .padding(.horizontal, 8)
                 .padding(.bottom, 16)
             } else {
-                HStack(spacing: 0) {
-                    // Main button
-                    Button {
-                        showingNewAgentSheet = true
-                    } label: {
-                        Text("New Agent")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 38)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .focusable(false)
-                    .background(Color.accentColor)
-
-                    // Separator
-                    Rectangle()
-                        .fill(settings.sidebarBackgroundColor)
-                        .frame(width: 1, height: 38)
-
-                    // Chevron button
-                    Button {
-                        showBenchPopover.toggle()
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white)
-                            .frame(width: 32, height: 38)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .background(Color.accentColor)
-                    .popover(isPresented: $showBenchPopover) {
-                        BenchDropdownView(
-                            onNewAgent: {
-                                showBenchPopover = false
-                                showingNewAgentSheet = true
-                            },
-                            onDeploy: { benchAgent in
-                                deployBenchAgent(benchAgent)
-                            }
-                        )
-                        .environment(agentManager)
-                    }
+                SplitButton("New Agent") {
+                    showingNewAgentSheet = true
+                } popover: {
+                    BenchDropdownView(
+                        onNewAgent: {
+                            showingNewAgentSheet = true
+                        },
+                        onDeploy: { benchAgent in
+                            agentManager.deployBenchAgent(benchAgent)
+                        }
+                    )
+                    .environment(agentManager)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 6))
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
@@ -303,24 +267,6 @@ struct SidebarView: View {
             }
         }
         return true
-    }
-
-    // MARK: - Bench
-
-    private func deployBenchAgent(_ benchAgent: BenchAgent) {
-        let fileManager = FileManager.default
-        var isDirectory: ObjCBool = false
-        guard fileManager.fileExists(atPath: benchAgent.folder, isDirectory: &isDirectory), isDirectory.boolValue else {
-            settings.removeFromBench(benchAgent)
-            return
-        }
-        agentManager.addAgent(
-            folder: benchAgent.folder,
-            name: benchAgent.name,
-            avatar: benchAgent.avatar,
-            agentType: benchAgent.agentType,
-            shellCommand: benchAgent.shellCommand
-        )
     }
 
     // MARK: - Broadcast
