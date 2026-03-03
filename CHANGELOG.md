@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - Manage your bench of favorite agents and deploy them into workspaces as needed
 
 ### Changed
-- N/A
+- Improved text injection method
 
 ### Fixed
 - Voice input: transcript loss during long dictation (Apple speech recognizer silent resets)
