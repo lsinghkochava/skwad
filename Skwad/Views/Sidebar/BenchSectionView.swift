@@ -50,7 +50,7 @@ struct BenchDropdownView: View {
                     .padding(.vertical, 8)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    VStack(spacing: 0) {
                         ForEach(settings.benchAgents) { benchAgent in
                             HStack(spacing: 8) {
                                 AvatarView(avatar: benchAgent.avatar, size: 24, font: .title3)
@@ -107,6 +107,7 @@ struct BenchDropdownView: View {
             Button("Cancel", role: .cancel) { agentToDelete = nil }
             Button("Remove", role: .destructive) {
                 if let agent = agentToDelete {
+                    hoveredAgentId = nil
                     withAnimation {
                         settings.removeFromBench(agent)
                     }
