@@ -187,4 +187,43 @@ final class AgentTests: XCTestCase {
         let agent = Agent(name: "Test", folder: "/tmp/test")
         XCTAssertFalse(agent.forkSession)
     }
+
+    // MARK: - Fork / Companion Prefill
+
+    func testForkPrefillCarriesPersonaId() {
+        let personaId = UUID()
+        var agent = Agent(name: "Test", avatar: "🐱", folder: "/tmp/test", agentType: "claude", personaId: personaId)
+        agent.sessionId = "session-123"
+
+        let prefill = agent.forkPrefill()
+
+        XCTAssertEqual(prefill.name, "Test (fork)")
+        XCTAssertEqual(prefill.avatar, "🐱")
+        XCTAssertEqual(prefill.folder, "/tmp/test")
+        XCTAssertEqual(prefill.agentType, "claude")
+        XCTAssertEqual(prefill.insertAfterId, agent.id)
+        XCTAssertEqual(prefill.sessionId, "session-123")
+        XCTAssertEqual(prefill.personaId, personaId)
+        XCTAssertFalse(prefill.isCompanion)
+    }
+
+    func testForkPrefillNilPersonaId() {
+        let agent = Agent(name: "Test", folder: "/tmp/test")
+        let prefill = agent.forkPrefill()
+        XCTAssertNil(prefill.personaId)
+    }
+
+    func testCompanionPrefillHasNilPersonaId() {
+        let personaId = UUID()
+        let agent = Agent(name: "Test", folder: "/tmp/test", personaId: personaId)
+
+        let prefill = agent.companionPrefill()
+
+        XCTAssertNil(prefill.personaId)
+        XCTAssertEqual(prefill.agentType, "shell")
+        XCTAssertTrue(prefill.isCompanion)
+        XCTAssertEqual(prefill.createdBy, agent.id)
+        XCTAssertEqual(prefill.insertAfterId, agent.id)
+        XCTAssertEqual(prefill.folder, "/tmp/test")
+    }
 }

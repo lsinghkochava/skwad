@@ -779,6 +779,147 @@ final class TerminalCommandBuilderTests: XCTestCase {
         settings.mcpServerEnabled = originalMCP
     }
 
+    // MARK: - Persona Instructions
+
+    @MainActor
+    func testClaudePersonaInstructionsAppendedToSystemPrompt() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let agentId = UUID()
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "claude",
+            settings: settings,
+            agentId: agentId,
+            persona: Persona(name: "TDD Expert", instructions: "You are a TDD expert following Kent Beck principles.")
+        )
+
+        XCTAssertTrue(command.contains("--append-system-prompt"))
+        XCTAssertTrue(command.contains("impersonate TDD Expert"))
+        XCTAssertTrue(command.contains("You are a TDD expert following Kent Beck principles."))
+        XCTAssertTrue(command.contains(agentId.uuidString))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testCodexPersonaInstructionsAppendedToSystemPrompt() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let agentId = UUID()
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "codex",
+            settings: settings,
+            agentId: agentId,
+            persona: Persona(name: "Security Auditor", instructions: "You are a security auditor.")
+        )
+
+        XCTAssertTrue(command.contains("developer_instructions"))
+        XCTAssertTrue(command.contains("You are a security auditor."))
+        XCTAssertTrue(command.contains(agentId.uuidString))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testPersonaInstructionsIgnoredWhenMCPDisabled() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = false
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "claude",
+            settings: settings,
+            agentId: UUID(),
+            persona: Persona(name: "Test", instructions: "Some persona")
+        )
+
+        XCTAssertFalse(command.contains("Some persona"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testPersonaInstructionsWithSpecialCharsAreEscaped() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let agentId = UUID()
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "claude",
+            settings: settings,
+            agentId: agentId,
+            persona: Persona(name: "Tester", instructions: #"Say "hello!" and use $vars"#)
+        )
+
+        // Should contain escaped versions
+        XCTAssertTrue(command.contains(#"\""#))    // escaped double quote
+        XCTAssertTrue(command.contains(#"\!"#))    // escaped exclamation
+        XCTAssertTrue(command.contains(#"\$"#))    // escaped dollar sign
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    func testShellEscapeHandlesAllDangerousChars() {
+        let input = #"He said "hello!" with $var and `cmd`"#
+        let escaped = TerminalCommandBuilder.shellEscape(input)
+        XCTAssertEqual(escaped, #"He said \"hello\!\" with \$var and \`cmd\`"#)
+    }
+
+    func testShellEscapeHandlesBackslash() {
+        let escaped = TerminalCommandBuilder.shellEscape(#"path\to\file"#)
+        XCTAssertEqual(escaped, #"path\\to\\file"#)
+    }
+
+    func testShellEscapeLeavesPlainTextUnchanged() {
+        let input = "You are a TDD expert following Kent Beck principles."
+        let escaped = TerminalCommandBuilder.shellEscape(input)
+        XCTAssertEqual(escaped, input)
+    }
+
+    func testPersonaPromptWrapsNameAndInstructions() {
+        let persona = Persona(name: "Kent Beck", instructions: "Follow TDD principles")
+        let prompt = TerminalCommandBuilder.personaPrompt(from: persona)
+        XCTAssertEqual(prompt, "You are asked to impersonate Kent Beck based on the following instructions: Follow TDD principles")
+    }
+
+    func testPersonaPromptReturnsNilForNilPersona() {
+        XCTAssertNil(TerminalCommandBuilder.personaPrompt(from: nil))
+    }
+
+    func testPersonaPromptReturnsNilForEmptyInstructions() {
+        let persona = Persona(name: "Empty", instructions: "")
+        XCTAssertNil(TerminalCommandBuilder.personaPrompt(from: persona))
+    }
+
+    @MainActor
+    func testNilPersonaInstructionsDoNotAlterPrompt() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let agentId = UUID()
+        let withoutPersona = TerminalCommandBuilder.buildAgentCommand(
+            for: "claude",
+            settings: settings,
+            agentId: agentId
+        )
+        let withNilPersona = TerminalCommandBuilder.buildAgentCommand(
+            for: "claude",
+            settings: settings,
+            agentId: agentId,
+            persona: nil
+        )
+
+        XCTAssertEqual(withoutPersona, withNilPersona)
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
     @MainActor
     func testCodexResumeKeepsSystemPrompt() {
         let settings = AppSettings.shared

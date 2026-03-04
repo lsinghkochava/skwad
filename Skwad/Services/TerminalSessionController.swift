@@ -67,6 +67,9 @@ class TerminalSessionController: ObservableObject {
     /// Optional command for shell agent type
     let shellCommand: String?
 
+    /// Optional persona to append to system prompt
+    let persona: Persona?
+
     /// Session ID to resume or fork (used once at launch, then ignored)
     let resumeSessionId: String?
 
@@ -125,6 +128,7 @@ class TerminalSessionController: ObservableObject {
         folder: String,
         agentType: String,
         shellCommand: String? = nil,
+        persona: Persona? = nil,
         resumeSessionId: String? = nil,
         forkSession: Bool = false,
         activityTracking: ActivityTracking = .all,
@@ -137,6 +141,7 @@ class TerminalSessionController: ObservableObject {
         self.folder = folder
         self.agentType = agentType
         self.shellCommand = shellCommand
+        self.persona = persona
         self.resumeSessionId = resumeSessionId
         self.forkSession = forkSession
         self.activityTracking = activityTracking
@@ -222,7 +227,8 @@ class TerminalSessionController: ObservableObject {
             agentId: agentIdForRegistration,
             shellCommand: shellCommand,
             resumeSessionId: resumeSessionId,
-            forkSession: forkSession
+            forkSession: forkSession,
+            persona: persona
         )
         return TerminalCommandBuilder.buildInitializationCommand(
             folder: folder,

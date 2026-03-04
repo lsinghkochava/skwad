@@ -101,4 +101,66 @@ final class MCPToolHandlerTests: XCTestCase {
         XCTAssertEqual(result.isError, true)
         XCTAssertTrue(result.content[0].text.contains("Unknown tool"))
     }
+
+    // MARK: - create-agent Tool
+
+    func testCreateAgentToolHasPersonaIdParam() async {
+        let tools = await handler.listTools()
+        let tool = tools.first { $0.name == "create-agent" }!
+        XCTAssertNotNil(tool.inputSchema.properties["personaId"])
+    }
+
+    @MainActor
+    func testCreateAgentDescriptionIncludesPersonas() async {
+        let settings = AppSettings.shared
+        let originalPersonas = settings.personas
+
+        let persona = settings.addPersona(name: "TDD Expert", instructions: "Follow TDD")
+        let tools = await handler.listTools()
+        let tool = tools.first { $0.name == "create-agent" }!
+
+        XCTAssertTrue(tool.description.contains("TDD Expert"))
+        XCTAssertTrue(tool.description.contains(persona.id.uuidString))
+
+        settings.personas = originalPersonas
+    }
+
+    @MainActor
+    func testCreateAgentDescriptionOmitsPersonasWhenEmpty() async {
+        let settings = AppSettings.shared
+        let originalPersonas = settings.personas
+
+        settings.personas = []
+        let tools = await handler.listTools()
+        let tool = tools.first { $0.name == "create-agent" }!
+
+        XCTAssertFalse(tool.description.contains("Available personas"))
+
+        settings.personas = originalPersonas
+    }
+
+    func testCreateAgentWithPersonaIdPassesThrough() async {
+        let (provider, _) = MockAgentDataProvider.createTestSetup(agentCount: 1)
+        await coordinator.setAgentDataProvider(provider)
+
+        let agents = await provider.getAgents()
+        let agentId = agents[0].id.uuidString
+        let personaId = UUID()
+
+        let result = await handler.callTool(name: "create-agent", arguments: [
+            "agentId": agentId,
+            "name": "TestAgent",
+            "agentType": "claude",
+            "repoPath": "/tmp",
+            "personaId": personaId.uuidString
+        ])
+
+        XCTAssertEqual(result.isError, false)
+
+        // Verify the agent was created with the personaId
+        let allAgents = await provider.getAgents()
+        let created = allAgents.first { $0.name == "TestAgent" }
+        XCTAssertNotNil(created)
+        XCTAssertEqual(created?.personaId, personaId)
+    }
 }

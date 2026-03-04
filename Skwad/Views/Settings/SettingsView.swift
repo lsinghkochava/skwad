@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum SettingsTab: Int, CaseIterable {
-  case general, coding, autopilot, voice, mcp, terminal
+  case general, coding, personas, autopilot, voice, mcp, terminal
 }
 
 struct SettingsView: View {
@@ -20,6 +20,12 @@ struct SettingsView: View {
         .tag(SettingsTab.coding)
         .tabItem {
           Label("Coding", systemImage: "chevron.left.forwardslash.chevron.right")
+        }
+
+      PersonasSettingsView()
+        .tag(SettingsTab.personas)
+        .tabItem {
+          Label("Personas", systemImage: "theatermasks")
         }
 
       AutopilotSettingsView()

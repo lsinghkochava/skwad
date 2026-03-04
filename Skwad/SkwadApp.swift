@@ -240,14 +240,7 @@ struct SkwadApp: App {
 
                 Button("Fork Agent...") {
                     if let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }) {
-                        forkPrefill = AgentPrefill(
-                            name: agent.name + " (fork)",
-                            avatar: agent.avatar,
-                            folder: agent.folder,
-                            agentType: agent.agentType,
-                            insertAfterId: agent.id,
-                            sessionId: agent.sessionId
-                        )
+                        forkPrefill = agent.forkPrefill()
                     }
                 }
                 .keyboardShortcut("f", modifiers: .command)

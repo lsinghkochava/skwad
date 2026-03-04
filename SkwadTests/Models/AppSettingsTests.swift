@@ -370,4 +370,94 @@ final class AppSettingsTests: XCTestCase {
         // Restore
         settings.savedAgents = originalSaved
     }
+
+    // MARK: - Persona Persistence
+
+    @MainActor
+    func testPersonaCRUD() {
+        let settings = AppSettings.shared
+        let originalPersonas = settings.personas
+
+        // Add
+        let persona = settings.addPersona(name: "TDD Expert", instructions: "Follow TDD principles")
+        XCTAssertEqual(settings.personas.count, originalPersonas.count + 1)
+        XCTAssertEqual(settings.persona(for: persona.id)?.name, "TDD Expert")
+
+        // Update
+        settings.updatePersona(id: persona.id, name: "TDD Master", instructions: "Updated instructions")
+        XCTAssertEqual(settings.persona(for: persona.id)?.name, "TDD Master")
+        XCTAssertEqual(settings.persona(for: persona.id)?.instructions, "Updated instructions")
+
+        // Remove
+        settings.removePersona(persona)
+        XCTAssertNil(settings.persona(for: persona.id))
+
+        // Restore
+        settings.personas = originalPersonas
+    }
+
+    func testPersonaNilLookup() {
+        let settings = AppSettings.shared
+        XCTAssertNil(settings.persona(for: nil))
+        XCTAssertNil(settings.persona(for: UUID()))
+    }
+
+    func testSavedAgentPersonaIdRoundTrip() throws {
+        let personaId = UUID()
+        let original = SavedAgent(id: UUID(), name: "WithPersona", avatar: "🤖", folder: "/tmp", personaId: personaId)
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(SavedAgent.self, from: data)
+
+        XCTAssertEqual(decoded.personaId, personaId)
+    }
+
+    func testSavedAgentDecodesOldFormatWithoutPersonaId() throws {
+        let json = """
+        {"id":"\(UUID().uuidString)","name":"Old","avatar":"🤖","folder":"/tmp","agentType":"claude"}
+        """
+        let data = json.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(SavedAgent.self, from: data)
+
+        XCTAssertNil(decoded.personaId)
+    }
+
+    @MainActor
+    func testSaveAndLoadAgentsPreservesPersonaId() {
+        let settings = AppSettings.shared
+        let originalSaved = settings.savedAgents
+
+        let personaId = UUID()
+        let agent = Agent(name: "WithPersona", avatar: "🤖", folder: "/tmp", agentType: "claude", personaId: personaId)
+        settings.saveAgents([agent])
+
+        let loaded = settings.loadSavedAgents()
+        XCTAssertEqual(loaded.count, 1)
+        XCTAssertEqual(loaded[0].personaId, personaId)
+
+        // Restore
+        settings.savedAgents = originalSaved
+    }
+
+    // MARK: - Agent Persona Decoding
+
+    func testAgentDecodesOldFormatWithoutPersonaId() throws {
+        let json = """
+        {"id":"\(UUID().uuidString)","name":"Old","folder":"/tmp","agentType":"claude"}
+        """
+        let data = json.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(Agent.self, from: data)
+
+        XCTAssertNil(decoded.personaId)
+    }
+
+    func testAgentPersonaIdRoundTrip() throws {
+        let personaId = UUID()
+        let original = Agent(name: "Test", folder: "/tmp", personaId: personaId)
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(Agent.self, from: data)
+
+        XCTAssertEqual(decoded.personaId, personaId)
+    }
 }

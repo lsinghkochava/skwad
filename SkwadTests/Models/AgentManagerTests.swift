@@ -278,6 +278,49 @@ struct AgentManagerTests {
             #expect(manager.companions(of: source.id).count == 2)
         }
 
+        @Test("duplicateAgent preserves personaId")
+        @MainActor
+        func duplicateAgentPreservesPersonaId() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 0)
+            let personaId = UUID()
+            manager.addAgent(folder: "/tmp/test", name: "Original", agentType: "claude", personaId: personaId)
+            let original = manager.agents[0]
+
+            manager.duplicateAgent(original)
+
+            #expect(manager.agents.count == 2)
+            #expect(manager.agents[1].personaId == personaId)
+        }
+
+        @Test("duplicateCompanions preserves personaId")
+        @MainActor
+        func duplicateCompanionsPreservesPersonaId() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 1)
+            let source = manager.agents[0]
+            let personaId = UUID()
+
+            let comp = Agent(name: "Comp", folder: source.folder, agentType: "codex", createdBy: source.id, isCompanion: true, personaId: personaId)
+            manager.agents.append(comp)
+
+            let newAgentId = manager.addAgent(folder: "/tmp/forked", name: "Forked")!
+            manager.duplicateCompanions(from: source.id, to: newAgentId, newFolder: "/tmp/forked")
+
+            let newCompanions = manager.companions(of: newAgentId)
+            #expect(newCompanions.count == 1)
+            #expect(newCompanions[0].personaId == personaId)
+        }
+
+        @Test("addAgent with personaId persists it")
+        @MainActor
+        func addAgentWithPersonaId() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 0)
+            let personaId = UUID()
+            manager.addAgent(folder: "/tmp/test", name: "Test", personaId: personaId)
+
+            #expect(manager.agents.count == 1)
+            #expect(manager.agents[0].personaId == personaId)
+        }
+
         @Test("duplicateCompanions with nil folder keeps original folders")
         @MainActor
         func duplicateCompanionsKeepsOriginalFolders() async {

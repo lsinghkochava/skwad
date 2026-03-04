@@ -86,24 +86,7 @@ actor MCPToolHandler {
                     required: ["repoPath"]
                 )
             ),
-            ToolDefinition(
-                name: MCPToolName.createAgent.rawValue,
-                description: "Create a new agent in Skwad. Can optionally create a new git worktree for the agent. Note: shell agents are plain terminals without an AI agent, so do not try to send messages to them.",
-                inputSchema: ToolInputSchema(
-                    properties: [
-                        "agentId": PropertySchema(type: "string", description: "Your agent ID (used to track who created the agent)"),
-                        "name": PropertySchema(type: "string", description: "Name for the agent"),
-                        "icon": PropertySchema(type: "string", description: "Emoji icon for the agent (e.g., '🤖')"),
-                        "agentType": PropertySchema(type: "string", description: "Agent type: claude, codex, opencode, gemini, copilot, custom1, custom2, or shell"),
-                        "repoPath": PropertySchema(type: "string", description: "Path to the repository or worktree folder"),
-                        "createWorktree": PropertySchema(type: "boolean", description: "If true, create a new worktree from repoPath"),
-                        "branchName": PropertySchema(type: "string", description: "Branch name for new worktree (required if createWorktree is true)"),
-                        "companion": PropertySchema(type: "boolean", description: "If true, the new agent is a companion of the creator: it won't appear in the agent list, its visibility is linked to the creator, and it will be closed when the creator is closed. Only use this flag if the user has explicitly asked for a companion agent."),
-                        "command": PropertySchema(type: "string", description: "Command to run (only for shell agent type)")
-                    ],
-                    required: ["name", "agentType", "repoPath"]
-                )
-            ),
+            createAgentToolDefinition(),
             ToolDefinition(
                 name: MCPToolName.closeAgent.rawValue,
                 description: "Close an agent that you created. You can only close agents that you created, not agents created by the user or other agents.",
@@ -151,6 +134,36 @@ actor MCPToolHandler {
                 )
             )
         ]
+    }
+
+    private func createAgentToolDefinition() -> ToolDefinition {
+        let personas = AppSettings.shared.personas
+        var description = "Create a new agent in Skwad. Can optionally create a new git worktree for the agent. Note: shell agents are plain terminals without an AI agent, so do not try to send messages to them."
+        var personaIdDescription = "ID of a persona to apply. Only works with agents that support system prompts (claude, codex)."
+        if !personas.isEmpty {
+            let personaList = personas.map { "\($0.name) (\($0.id.uuidString))" }.joined(separator: ", ")
+            description += " Available personas: \(personaList)."
+            personaIdDescription += " Available: \(personaList)."
+        }
+        return ToolDefinition(
+            name: MCPToolName.createAgent.rawValue,
+            description: description,
+            inputSchema: ToolInputSchema(
+                properties: [
+                    "agentId": PropertySchema(type: "string", description: "Your agent ID (used to track who created the agent)"),
+                    "name": PropertySchema(type: "string", description: "Name for the agent"),
+                    "icon": PropertySchema(type: "string", description: "Emoji icon for the agent (e.g., '🤖')"),
+                    "agentType": PropertySchema(type: "string", description: "Agent type: claude, codex, opencode, gemini, copilot, custom1, custom2, or shell"),
+                    "repoPath": PropertySchema(type: "string", description: "Path to the repository or worktree folder"),
+                    "createWorktree": PropertySchema(type: "boolean", description: "If true, create a new worktree from repoPath"),
+                    "branchName": PropertySchema(type: "string", description: "Branch name for new worktree (required if createWorktree is true)"),
+                    "companion": PropertySchema(type: "boolean", description: "If true, the new agent is a companion of the creator: it won't appear in the agent list, its visibility is linked to the creator, and it will be closed when the creator is closed. Only use this flag if the user has explicitly asked for a companion agent."),
+                    "command": PropertySchema(type: "string", description: "Command to run (only for shell agent type)"),
+                    "personaId": PropertySchema(type: "string", description: personaIdDescription)
+                ],
+                required: ["name", "agentType", "repoPath"]
+            )
+        )
     }
 
     // MARK: - Tool Execution
@@ -344,6 +357,7 @@ actor MCPToolHandler {
         let branchName = arguments["branchName"] as? String
         let companion = arguments["companion"] as? Bool ?? false
         let shellCommand = arguments["command"] as? String
+        let personaId = (arguments["personaId"] as? String).flatMap { UUID(uuidString: $0) }
 
         // Validate branch name is provided if creating worktree
         if createWorktree && (branchName == nil || branchName!.isEmpty) {
@@ -363,7 +377,8 @@ actor MCPToolHandler {
             branchName: branchName,
             createdBy: createdBy,
             companion: companion,
-            shellCommand: shellCommand
+            shellCommand: shellCommand,
+            personaId: personaId
         )
 
         return successResult(result)

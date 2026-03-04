@@ -11,8 +11,9 @@ struct AgentPrefill: Identifiable {
     let createdBy: UUID?
     let isCompanion: Bool
     let sessionId: String?
+    let personaId: UUID?
 
-    init(name: String, avatar: String?, folder: String, agentType: String, insertAfterId: UUID? = nil, createdBy: UUID? = nil, isCompanion: Bool = false, sessionId: String? = nil) {
+    init(name: String, avatar: String?, folder: String, agentType: String, insertAfterId: UUID? = nil, createdBy: UUID? = nil, isCompanion: Bool = false, sessionId: String? = nil, personaId: UUID? = nil) {
         self.name = name
         self.avatar = avatar
         self.folder = folder
@@ -21,6 +22,7 @@ struct AgentPrefill: Identifiable {
         self.createdBy = createdBy
         self.isCompanion = isCompanion
         self.sessionId = sessionId
+        self.personaId = personaId
     }
 }
 
@@ -52,6 +54,9 @@ struct AgentSheet: View {
     // Companion options
     @State private var relocateCompanions = true
     @State private var includeCompanions = false
+
+    // Persona
+    @State private var selectedPersonaId: UUID? = nil
 
     // Fork conversation
     @State private var keepConversation = false
@@ -104,6 +109,7 @@ struct AgentSheet: View {
             _name = State(initialValue: prefill.name)
             _avatar = State(initialValue: prefill.avatar ?? "🤖")
             _selectedAgentType = State(initialValue: prefill.agentType)
+            _selectedPersonaId = State(initialValue: prefill.personaId)
             _shouldApplyPrefillWorktree = State(initialValue: !prefill.folder.isEmpty)
         }
     }
@@ -168,6 +174,17 @@ struct AgentSheet: View {
                             LabeledContent("Command") {
                                 TextField("", text: $shellCommand, prompt: Text("Optional shell command"))
                                     .textFieldStyle(.plain)
+                            }
+                        }
+
+                        if TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
+                            LabeledContent("Persona") {
+                                Picker("", selection: $selectedPersonaId) {
+                                    Text("None").tag(nil as UUID?)
+                                    ForEach(settings.personas) { persona in
+                                        Text(persona.name).tag(persona.id as UUID?)
+                                    }
+                                }
                             }
                         }
                     }
@@ -414,6 +431,9 @@ struct AgentSheet: View {
         let showCompanionToggle = hasCompanions && ((isEditing && folderChanged) || isForking)
         if showCompanionToggle { height += 40 }
         if canForkConversation { height += 40 }
+        if !isEditing && TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
+            height += 40
+        }
         return height
     }
 
@@ -588,7 +608,8 @@ struct AgentSheet: View {
             insertAfterId: prefill?.insertAfterId,
             shellCommand: shellCommand.isEmpty ? nil : shellCommand,
             resumeSessionId: keepConversation ? prefill?.sessionId : nil,
-            forkSession: keepConversation
+            forkSession: keepConversation,
+            personaId: selectedPersonaId
         )
 
         if let newAgentId, let createdBy = prefill?.createdBy, prefill?.isCompanion == true {

@@ -11,8 +11,9 @@ struct SavedAgent: Codable, Identifiable {
     var createdBy: UUID?
     var isCompanion: Bool
     var shellCommand: String?
+    var personaId: UUID?
 
-    init(id: UUID, name: String, avatar: String, folder: String, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil) {
+    init(id: UUID, name: String, avatar: String, folder: String, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil, personaId: UUID? = nil) {
         self.id = id
         self.name = name
         self.avatar = avatar
@@ -21,6 +22,7 @@ struct SavedAgent: Codable, Identifiable {
         self.createdBy = createdBy
         self.isCompanion = isCompanion
         self.shellCommand = shellCommand
+        self.personaId = personaId
     }
 
     // Custom decoding to handle migration from old format without newer fields
@@ -34,10 +36,23 @@ struct SavedAgent: Codable, Identifiable {
         createdBy = try container.decodeIfPresent(UUID.self, forKey: .createdBy)
         isCompanion = try container.decodeIfPresent(Bool.self, forKey: .isCompanion) ?? false
         shellCommand = try container.decodeIfPresent(String.self, forKey: .shellCommand)
+        personaId = try container.decodeIfPresent(UUID.self, forKey: .personaId)
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, name, avatar, folder, agentType, createdBy, isCompanion, shellCommand
+        case id, name, avatar, folder, agentType, createdBy, isCompanion, shellCommand, personaId
+    }
+}
+
+struct Persona: Codable, Identifiable, Equatable {
+    let id: UUID
+    var name: String
+    var instructions: String
+
+    init(id: UUID = UUID(), name: String, instructions: String) {
+        self.id = id
+        self.name = name
+        self.instructions = instructions
     }
 }
 
@@ -48,14 +63,16 @@ struct BenchAgent: Codable, Identifiable {
     var folder: String
     var agentType: String
     var shellCommand: String?
+    var personaId: UUID?
 
-    init(id: UUID = UUID(), name: String, avatar: String, folder: String, agentType: String = "claude", shellCommand: String? = nil) {
+    init(id: UUID = UUID(), name: String, avatar: String, folder: String, agentType: String = "claude", shellCommand: String? = nil, personaId: UUID? = nil) {
         self.id = id
         self.name = name
         self.avatar = avatar
         self.folder = folder
         self.agentType = agentType
         self.shellCommand = shellCommand
+        self.personaId = personaId
     }
 
     init(from agent: Agent) {
@@ -65,6 +82,7 @@ struct BenchAgent: Codable, Identifiable {
         self.folder = agent.folder
         self.agentType = agent.agentType
         self.shellCommand = agent.shellCommand
+        self.personaId = agent.personaId
     }
 }
 
@@ -210,6 +228,47 @@ class AppSettings: ObservableObject {
         recentRepos = recent
     }
 
+    // Personas
+    @AppStorage("personasData") private var personasData: Data = Data()
+
+    var personas: [Persona] {
+        get {
+            let list = (try? JSONDecoder().decode([Persona].self, from: personasData)) ?? []
+            return list.sorted { $0.name.lowercased() < $1.name.lowercased() }
+        }
+        set {
+            personasData = (try? JSONEncoder().encode(newValue)) ?? Data()
+        }
+    }
+
+    func addPersona(name: String, instructions: String) -> Persona {
+        let persona = Persona(name: name, instructions: instructions)
+        var list = personas
+        list.append(persona)
+        personas = list
+        return persona
+    }
+
+    func updatePersona(id: UUID, name: String, instructions: String) {
+        var list = personas
+        if let index = list.firstIndex(where: { $0.id == id }) {
+            list[index].name = name
+            list[index].instructions = instructions
+            personas = list
+        }
+    }
+
+    func removePersona(_ persona: Persona) {
+        var list = personas
+        list.removeAll { $0.id == persona.id }
+        personas = list
+    }
+
+    func persona(for id: UUID?) -> Persona? {
+        guard let id else { return nil }
+        return personas.first { $0.id == id }
+    }
+
     // Bench agents (user-curated agent templates)
     @AppStorage("benchAgentsData") private var benchAgentsData: Data = Data()
 
@@ -297,12 +356,12 @@ class AppSettings: ObservableObject {
     }
 
     func saveAgents(_ agents: [Agent]) {
-        savedAgents = agents.map { SavedAgent(id: $0.id, name: $0.name, avatar: $0.avatar ?? "🤖", folder: $0.folder, agentType: $0.agentType, createdBy: $0.createdBy, isCompanion: $0.isCompanion, shellCommand: $0.shellCommand) }
+        savedAgents = agents.map { SavedAgent(id: $0.id, name: $0.name, avatar: $0.avatar ?? "🤖", folder: $0.folder, agentType: $0.agentType, createdBy: $0.createdBy, isCompanion: $0.isCompanion, shellCommand: $0.shellCommand, personaId: $0.personaId) }
     }
 
     func loadSavedAgents() -> [Agent] {
         savedAgents.map {
-            var agent = Agent(id: $0.id, name: $0.name, avatar: $0.avatar, folder: $0.folder, agentType: $0.agentType, createdBy: $0.createdBy, isCompanion: $0.isCompanion, shellCommand: $0.shellCommand)
+            var agent = Agent(id: $0.id, name: $0.name, avatar: $0.avatar, folder: $0.folder, agentType: $0.agentType, createdBy: $0.createdBy, isCompanion: $0.isCompanion, shellCommand: $0.shellCommand, personaId: $0.personaId)
             // Shell agents restored from persistence get deferred startup
             agent.isPendingStart = agent.isShell
             return agent

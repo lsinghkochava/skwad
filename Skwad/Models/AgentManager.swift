@@ -287,6 +287,7 @@ final class AgentManager {
             folder: agent.folder,
             agentType: agent.agentType,
             shellCommand: agent.shellCommand,
+            persona: settings.persona(for: agent.personaId),
             resumeSessionId: agent.resumeSessionId,
             forkSession: agent.forkSession,
             activityTracking: tracking,
@@ -498,9 +499,10 @@ final class AgentManager {
         insertAfterId: UUID? = nil,
         shellCommand: String? = nil,
         resumeSessionId: String? = nil,
-        forkSession: Bool = false
+        forkSession: Bool = false,
+        personaId: UUID? = nil
     ) -> UUID? {
-        var agent = Agent(folder: folder, avatar: avatar, agentType: agentType, createdBy: createdBy, isCompanion: isCompanion, shellCommand: shellCommand)
+        var agent = Agent(folder: folder, avatar: avatar, agentType: agentType, createdBy: createdBy, isCompanion: isCompanion, shellCommand: shellCommand, personaId: personaId)
         agent.resumeSessionId = resumeSessionId
         agent.forkSession = forkSession
         if let name = name {
@@ -559,7 +561,8 @@ final class AgentManager {
             name: benchAgent.name,
             avatar: benchAgent.avatar,
             agentType: benchAgent.agentType,
-            shellCommand: benchAgent.shellCommand
+            shellCommand: benchAgent.shellCommand,
+            personaId: benchAgent.personaId
         )
     }
 
@@ -656,7 +659,7 @@ final class AgentManager {
 
     @discardableResult
     func createDuplicateAgent(_ agent: Agent, nameSuffix: String = " (copy)") -> Agent {
-        var newAgent = Agent(folder: agent.folder, avatar: agent.avatar, agentType: agent.agentType)
+        var newAgent = Agent(folder: agent.folder, avatar: agent.avatar, agentType: agent.agentType, personaId: agent.personaId)
         newAgent.name = agent.name + nameSuffix
 
         // Add to master list
@@ -703,7 +706,8 @@ final class AgentManager {
                 createdBy: newAgentId,
                 isCompanion: true,
                 insertAfterId: newAgentId,
-                shellCommand: companion.shellCommand
+                shellCommand: companion.shellCommand,
+                personaId: companion.personaId
             )
         }
     }

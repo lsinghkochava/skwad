@@ -24,7 +24,7 @@ protocol AgentDataProvider: Sendable {
     func setSessionId(for agentId: UUID, sessionId: String) async
     func updateAgentStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource) async
     func injectText(_ text: String, for agentId: UUID) async
-    func addAgent(folder: String, name: String, avatar: String?, agentType: String, createdBy: UUID?, companion: Bool, shellCommand: String?) async -> UUID?
+    func addAgent(folder: String, name: String, avatar: String?, agentType: String, createdBy: UUID?, companion: Bool, shellCommand: String?, personaId: UUID?) async -> UUID?
     func removeAgent(id: UUID) async -> Bool
     func showMarkdownPanel(filePath: String, maximized: Bool, agentId: UUID) async -> Bool
     func showMermaidPanel(source: String, title: String?, agentId: UUID) async -> Bool
@@ -372,7 +372,8 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
         branchName: String?,
         createdBy: UUID?,
         companion: Bool,
-        shellCommand: String?
+        shellCommand: String?,
+        personaId: UUID? = nil
     ) async -> CreateAgentResponse {
         guard let provider = agentDataProvider else {
             return CreateAgentResponse(success: false, agentId: nil, message: "AgentDataProvider not available")
@@ -428,7 +429,7 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
         }
 
         // Create the agent via the provider
-        if let agentId = await provider.addAgent(folder: folder, name: name, avatar: icon, agentType: agentType, createdBy: createdBy, companion: companion, shellCommand: shellCommand) {
+        if let agentId = await provider.addAgent(folder: folder, name: name, avatar: icon, agentType: agentType, createdBy: createdBy, companion: companion, shellCommand: shellCommand, personaId: personaId) {
             logger.info("[skwad] Created agent '\(name)' with ID \(agentId)")
             return CreateAgentResponse(success: true, agentId: agentId.uuidString, message: "Agent created successfully")
         } else {
@@ -594,10 +595,10 @@ final class AgentManagerWrapper: AgentDataProvider, @unchecked Sendable {
         }
     }
 
-    func addAgent(folder: String, name: String, avatar: String?, agentType: String, createdBy: UUID?, companion: Bool, shellCommand: String?) async -> UUID? {
+    func addAgent(folder: String, name: String, avatar: String?, agentType: String, createdBy: UUID?, companion: Bool, shellCommand: String?, personaId: UUID?) async -> UUID? {
         await MainActor.run {
             guard let manager = manager else { return nil }
-            guard let newAgentId = manager.addAgent(folder: folder, name: name, avatar: avatar, agentType: agentType, createdBy: createdBy, isCompanion: companion, shellCommand: shellCommand) else {
+            guard let newAgentId = manager.addAgent(folder: folder, name: name, avatar: avatar, agentType: agentType, createdBy: createdBy, isCompanion: companion, shellCommand: shellCommand, personaId: personaId) else {
                 return nil
             }
 

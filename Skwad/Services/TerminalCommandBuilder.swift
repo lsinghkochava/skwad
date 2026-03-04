@@ -16,7 +16,7 @@ struct TerminalCommandBuilder {
   ///   - agentId: The agent's UUID for inline registration (optional)
   ///   - shellCommand: Optional command to run for shell agent type
   /// - Returns: The complete agent command with all arguments
-  static func buildAgentCommand(for agentType: String, settings: AppSettings, agentId: UUID? = nil, shellCommand: String? = nil, resumeSessionId: String? = nil, forkSession: Bool = false) -> String {
+  static func buildAgentCommand(for agentType: String, settings: AppSettings, agentId: UUID? = nil, shellCommand: String? = nil, resumeSessionId: String? = nil, forkSession: Bool = false, persona: Persona? = nil) -> String {
     // Shell type: return custom command or empty
     if agentType == "shell" {
       return shellCommand ?? ""
@@ -59,11 +59,31 @@ struct TerminalCommandBuilder {
 
       // Add inline registration for supported agents
       if let agentId = agentId {
-        fullCommand += getInlineRegistrationArguments(for: agentType, agentId: agentId, isResume: resumeSessionId != nil)
+        fullCommand += getInlineRegistrationArguments(for: agentType, agentId: agentId, isResume: resumeSessionId != nil, persona: persona)
       }
     }
 
     return fullCommand
+  }
+
+  // MARK: - Shell Escaping
+
+  /// Escape a string for safe embedding inside double-quoted shell arguments.
+  /// Handles: backslash, double quote, dollar sign, backtick, and exclamation mark.
+  static func shellEscape(_ string: String) -> String {
+    var result = string
+    result = result.replacingOccurrences(of: "\\", with: "\\\\")
+    result = result.replacingOccurrences(of: "\"", with: "\\\"")
+    result = result.replacingOccurrences(of: "$", with: "\\$")
+    result = result.replacingOccurrences(of: "`", with: "\\`")
+    result = result.replacingOccurrences(of: "!", with: "\\!")
+    return result
+  }
+
+  /// Build the persona prompt from a Persona.
+  static func personaPrompt(from persona: Persona?) -> String? {
+    guard let persona, !persona.instructions.isEmpty else { return nil }
+    return "You are asked to impersonate \(persona.name) based on the following instructions: \(persona.instructions)"
   }
 
   // MARK: - Registration Prompt Strings
@@ -137,11 +157,14 @@ struct TerminalCommandBuilder {
 
   /// Get inline registration arguments for supported agents
   /// See `doc/agent-cli-arguments.md` for CLI argument reference
-  private static func getInlineRegistrationArguments(for agentType: String, agentId: UUID, isResume: Bool = false) -> String {
+  private static func getInlineRegistrationArguments(for agentType: String, agentId: UUID, isResume: Bool = false, persona: Persona? = nil) -> String {
     switch agentType {
     case "claude":
       // Claude: registration is handled by hooks, just inject system prompt
-      let systemPrompt = registrationSystemPrompt(agentId: agentId)
+      var systemPrompt = registrationSystemPrompt(agentId: agentId)
+      if let personaPrompt = personaPrompt(from: persona) {
+        systemPrompt += " " + shellEscape(personaPrompt)
+      }
       // Skip user prompt on resume/fork — the agent already has conversation context
       if isResume {
         return #" --append-system-prompt "\#(systemPrompt)""#
@@ -150,7 +173,10 @@ struct TerminalCommandBuilder {
 
     case "codex":
       // Codex: system prompt via -c developer_instructions, user prompt as last argument
-      let systemPrompt = registrationSystemPrompt(agentId: agentId)
+      var systemPrompt = registrationSystemPrompt(agentId: agentId)
+      if let personaPrompt = personaPrompt(from: persona) {
+        systemPrompt += " " + shellEscape(personaPrompt)
+      }
       if isResume {
         return #" -c 'developer_instructions="\#(systemPrompt)"'"#
       }

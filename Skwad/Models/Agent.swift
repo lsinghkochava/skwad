@@ -33,6 +33,7 @@ struct Agent: Identifiable, Codable, Hashable {
     var createdBy: UUID?  // Agent ID that created this agent (nil if created by user)
     var isCompanion: Bool = false  // If true, this agent is a companion of the createdBy agent
     var shellCommand: String?  // Command to run for shell agent type
+    var personaId: UUID?  // Optional persona to apply to system prompt
 
     // Runtime state (not persisted)
     var status: AgentStatus = .idle
@@ -61,7 +62,7 @@ struct Agent: Identifiable, Codable, Hashable {
 
     // Only persist these fields
     enum CodingKeys: String, CodingKey {
-        case id, name, avatar, folder, agentType, createdBy, isCompanion, shellCommand
+        case id, name, avatar, folder, agentType, createdBy, isCompanion, shellCommand, personaId
     }
 
     // Custom decoding to handle migration from old format without isCompanion/createdBy
@@ -75,9 +76,10 @@ struct Agent: Identifiable, Codable, Hashable {
         createdBy = try container.decodeIfPresent(UUID.self, forKey: .createdBy)
         isCompanion = try container.decodeIfPresent(Bool.self, forKey: .isCompanion) ?? false
         shellCommand = try container.decodeIfPresent(String.self, forKey: .shellCommand)
+        personaId = try container.decodeIfPresent(UUID.self, forKey: .personaId)
     }
 
-    init(id: UUID = UUID(), name: String, avatar: String? = nil, folder: String, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil) {
+    init(id: UUID = UUID(), name: String, avatar: String? = nil, folder: String, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil, personaId: UUID? = nil) {
         self.id = id
         self.name = name
         self.avatar = avatar
@@ -86,10 +88,11 @@ struct Agent: Identifiable, Codable, Hashable {
         self.createdBy = createdBy
         self.isCompanion = isCompanion
         self.shellCommand = shellCommand
+        self.personaId = personaId
     }
 
     /// Create agent from folder path, deriving name from last path component
-    init(folder: String, avatar: String? = nil, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil) {
+    init(folder: String, avatar: String? = nil, agentType: String = "claude", createdBy: UUID? = nil, isCompanion: Bool = false, shellCommand: String? = nil, personaId: UUID? = nil) {
         self.id = UUID()
         self.folder = folder
         self.avatar = avatar
@@ -97,7 +100,34 @@ struct Agent: Identifiable, Codable, Hashable {
         self.createdBy = createdBy
         self.isCompanion = isCompanion
         self.shellCommand = shellCommand
+        self.personaId = personaId
         self.name = URL(fileURLWithPath: folder).lastPathComponent
+    }
+
+    /// Prefill for forking this agent
+    func forkPrefill() -> AgentPrefill {
+        AgentPrefill(
+            name: name + " (fork)",
+            avatar: avatar,
+            folder: folder,
+            agentType: agentType,
+            insertAfterId: id,
+            sessionId: sessionId,
+            personaId: personaId
+        )
+    }
+
+    /// Prefill for creating a new companion of this agent
+    func companionPrefill() -> AgentPrefill {
+        AgentPrefill(
+            name: "",
+            avatar: nil,
+            folder: folder,
+            agentType: "shell",
+            insertAfterId: id,
+            createdBy: id,
+            isCompanion: true
+        )
     }
 
     /// Whether this is a plain shell agent (no AI)

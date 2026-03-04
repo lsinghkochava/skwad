@@ -49,6 +49,8 @@
 		8D8C03092F54090300A06866 /* ArtifactPanelLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8C03062F54090300A06866 /* ArtifactPanelLayoutTests.swift */; };
 		8D8C030A2F54090300A06866 /* MermaidThemeOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8C03072F54090300A06866 /* MermaidThemeOptionTests.swift */; };
 		8D8C030C2F54092100A06866 /* MarkdownToHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8C030B2F54092100A06866 /* MarkdownToHTMLTests.swift */; };
+		8DB21B7F2F57C75600BB9DFB /* PersonaSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB21B7D2F57C75600BB9DFB /* PersonaSheet.swift */; };
+		8DB21B802F57C75600BB9DFB /* PersonasSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB21B7E2F57C75600BB9DFB /* PersonasSettingsView.swift */; };
 		8DBD63392F478DB40049E5DC /* AIProxy in Frameworks */ = {isa = PBXBuildFile; productRef = 8DBD63382F478DB40049E5DC /* AIProxy */; };
 		8DBD634E2F479A770049E5DC /* AutopilotSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DBD634D2F479A770049E5DC /* AutopilotSettingsView.swift */; };
 		8DBD63542F479B570049E5DC /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DBD63522F479B570049E5DC /* TerminalSettingsView.swift */; };
@@ -124,11 +126,11 @@
 		SR000007 /* TerminalAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100007 /* TerminalAdapter.swift */; };
 		SR000008 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100008 /* NotificationService.swift */; };
 		SR000009 /* ConversationHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100009 /* ConversationHistoryService.swift */; };
+		SR000010 /* FileSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100010 /* FileSearchService.swift */; };
 		SR000011 /* ClaudeHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100011 /* ClaudeHistoryProvider.swift */; };
 		SR000012 /* CodexHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100012 /* CodexHistoryProvider.swift */; };
 		SR000013 /* GeminiHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100013 /* GeminiHistoryProvider.swift */; };
 		SR000014 /* CopilotHistoryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100014 /* CopilotHistoryProvider.swift */; };
-		SR000010 /* FileSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SR100010 /* FileSearchService.swift */; };
 		TS000001 /* GitOutputParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100001 /* GitOutputParserTests.swift */; };
 		TS000002 /* GitOutputFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100002 /* GitOutputFixtures.swift */; };
 		TS000003 /* CommitSheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100003 /* CommitSheetTests.swift */; };
@@ -170,11 +172,11 @@
 		TS000041 /* NotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100040 /* NotificationServiceTests.swift */; };
 		TS000042 /* TerminalCommandBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100041 /* TerminalCommandBuilderTests.swift */; };
 		TS000043 /* ConversationHistoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100042 /* ConversationHistoryServiceTests.swift */; };
+		TS000044 /* FuzzyScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100044 /* FuzzyScorerTests.swift */; };
+		TS000045 /* FileSearchServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100045 /* FileSearchServiceTests.swift */; };
 		TS000046 /* CodexHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100046 /* CodexHistoryProviderTests.swift */; };
 		TS000047 /* GeminiHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100047 /* GeminiHistoryProviderTests.swift */; };
 		TS000048 /* CopilotHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100048 /* CopilotHistoryProviderTests.swift */; };
-		TS000044 /* FuzzyScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100044 /* FuzzyScorerTests.swift */; };
-		TS000045 /* FileSearchServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100045 /* FileSearchServiceTests.swift */; };
 		UP000001 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = UP100001 /* UpdaterManager.swift */; };
 		UT000001 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT100001 /* Clipboard.swift */; };
 		UT000002 /* TerminalTextCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = UT100002 /* TerminalTextCleaner.swift */; };
@@ -245,6 +247,8 @@
 		8D8C03062F54090300A06866 /* ArtifactPanelLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactPanelLayoutTests.swift; sourceTree = "<group>"; };
 		8D8C03072F54090300A06866 /* MermaidThemeOptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MermaidThemeOptionTests.swift; sourceTree = "<group>"; };
 		8D8C030B2F54092100A06866 /* MarkdownToHTMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownToHTMLTests.swift; sourceTree = "<group>"; };
+		8DB21B7D2F57C75600BB9DFB /* PersonaSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonaSheet.swift; sourceTree = "<group>"; };
+		8DB21B7E2F57C75600BB9DFB /* PersonasSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonasSettingsView.swift; sourceTree = "<group>"; };
 		8DBD634D2F479A770049E5DC /* AutopilotSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutopilotSettingsView.swift; sourceTree = "<group>"; };
 		8DBD634F2F479B570049E5DC /* CodingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingSettingsView.swift; sourceTree = "<group>"; };
 		8DBD63502F479B570049E5DC /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
@@ -324,11 +328,11 @@
 		SR100007 /* TerminalAdapter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TerminalAdapter.swift; sourceTree = "<group>"; };
 		SR100008 /* NotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		SR100009 /* ConversationHistoryService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConversationHistoryService.swift; sourceTree = "<group>"; };
+		SR100010 /* FileSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSearchService.swift; sourceTree = "<group>"; };
 		SR100011 /* ClaudeHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeHistoryProvider.swift; sourceTree = "<group>"; };
 		SR100012 /* CodexHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryProvider.swift; sourceTree = "<group>"; };
 		SR100013 /* GeminiHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiHistoryProvider.swift; sourceTree = "<group>"; };
 		SR100014 /* CopilotHistoryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotHistoryProvider.swift; sourceTree = "<group>"; };
-		SR100010 /* FileSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSearchService.swift; sourceTree = "<group>"; };
 		TS100001 /* GitOutputParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitOutputParserTests.swift; sourceTree = "<group>"; };
 		TS100002 /* GitOutputFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitOutputFixtures.swift; sourceTree = "<group>"; };
 		TS100003 /* CommitSheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitSheetTests.swift; sourceTree = "<group>"; };
@@ -369,12 +373,12 @@
 		TS100040 /* NotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceTests.swift; sourceTree = "<group>"; };
 		TS100041 /* TerminalCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCommandBuilderTests.swift; sourceTree = "<group>"; };
 		TS100042 /* ConversationHistoryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationHistoryServiceTests.swift; sourceTree = "<group>"; };
-		TS100046 /* CodexHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryProviderTests.swift; sourceTree = "<group>"; };
-		TS100047 /* GeminiHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiHistoryProviderTests.swift; sourceTree = "<group>"; };
-		TS100048 /* CopilotHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotHistoryProviderTests.swift; sourceTree = "<group>"; };
 		TS100043 /* AgentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTests.swift; sourceTree = "<group>"; };
 		TS100044 /* FuzzyScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyScorerTests.swift; sourceTree = "<group>"; };
 		TS100045 /* FileSearchServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSearchServiceTests.swift; sourceTree = "<group>"; };
+		TS100046 /* CodexHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryProviderTests.swift; sourceTree = "<group>"; };
+		TS100047 /* GeminiHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiHistoryProviderTests.swift; sourceTree = "<group>"; };
+		TS100048 /* CopilotHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotHistoryProviderTests.swift; sourceTree = "<group>"; };
 		TS100100 /* SkwadTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SkwadTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		UP100001 /* UpdaterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterManager.swift; sourceTree = "<group>"; };
 		UT100001 /* Clipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clipboard.swift; sourceTree = "<group>"; };
@@ -591,6 +595,8 @@
 				8DBD634F2F479B570049E5DC /* CodingSettingsView.swift */,
 				8DBD63502F479B570049E5DC /* GeneralSettingsView.swift */,
 				8DBD63512F479B570049E5DC /* MCPSettingsView.swift */,
+				8DB21B7D2F57C75600BB9DFB /* PersonaSheet.swift */,
+				8DB21B7E2F57C75600BB9DFB /* PersonasSettingsView.swift */,
 				F800000A /* SettingsView.swift */,
 				8DBD63522F479B570049E5DC /* TerminalSettingsView.swift */,
 				8DBD63532F479B570049E5DC /* VoiceSettingsView.swift */,
@@ -1112,6 +1118,8 @@
 				UT000003 /* WindowResizeObserver.swift in Sources */,
 				UT000004 /* ManagedTimer.swift in Sources */,
 				UT000005 /* PathUtils.swift in Sources */,
+				8DB21B7F2F57C75600BB9DFB /* PersonaSheet.swift in Sources */,
+				8DB21B802F57C75600BB9DFB /* PersonasSettingsView.swift in Sources */,
 				UT000006 /* AvatarUtils.swift in Sources */,
 				UT000007 /* VoiceAudioUtils.swift in Sources */,
 				UT000008 /* FuzzyScorer.swift in Sources */,

@@ -68,25 +68,10 @@ struct AgentTerminalView: View {
                     agent: agent,
                     onEdit: { agentToEdit = agent },
                     onFork: {
-                        forkPrefill = AgentPrefill(
-                            name: agent.name + " (fork)",
-                            avatar: agent.avatar,
-                            folder: agent.folder,
-                            agentType: agent.agentType,
-                            insertAfterId: agent.id,
-                            sessionId: agent.sessionId
-                        )
+                        forkPrefill = agent.forkPrefill()
                     },
                     onNewCompanion: {
-                        forkPrefill = AgentPrefill(
-                            name: "",
-                            avatar: nil,
-                            folder: agent.folder,
-                            agentType: "shell",
-                            insertAfterId: agent.id,
-                            createdBy: agent.id,
-                            isCompanion: true
-                        )
+                        forkPrefill = agent.companionPrefill()
                     },
                     onShellCompanion: {
                         agentManager.createShellCompanion(for: agent)

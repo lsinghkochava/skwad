@@ -143,4 +143,39 @@ final class BenchAgentTests: XCTestCase {
         XCTAssertEqual(decoded.agentType, original.agentType)
         XCTAssertEqual(decoded.shellCommand, original.shellCommand)
     }
+
+    // MARK: - Persona Preservation
+
+    func testBenchAgentFromAgentPreservesPersonaId() {
+        let personaId = UUID()
+        let agent = Agent(name: "Test", avatar: "🤖", folder: "/tmp", agentType: "claude", personaId: personaId)
+        let benchAgent = BenchAgent(from: agent)
+        XCTAssertEqual(benchAgent.personaId, personaId)
+    }
+
+    func testBenchAgentFromAgentNilPersonaId() {
+        let agent = Agent(name: "Test", folder: "/tmp")
+        let benchAgent = BenchAgent(from: agent)
+        XCTAssertNil(benchAgent.personaId)
+    }
+
+    func testBenchAgentPersonaIdRoundTrip() throws {
+        let personaId = UUID()
+        let original = BenchAgent(name: "Test", avatar: "🤖", folder: "/tmp", personaId: personaId)
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(BenchAgent.self, from: data)
+
+        XCTAssertEqual(decoded.personaId, personaId)
+    }
+
+    func testBenchAgentDecodesOldFormatWithoutPersonaId() throws {
+        let json = """
+        {"id":"\(UUID().uuidString)","name":"Old","avatar":"🤖","folder":"/tmp","agentType":"claude"}
+        """
+        let data = json.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(BenchAgent.self, from: data)
+
+        XCTAssertNil(decoded.personaId)
+    }
 }

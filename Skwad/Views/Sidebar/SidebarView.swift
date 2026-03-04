@@ -55,25 +55,10 @@ struct SidebarView: View {
                             agent: agent,
                             onEdit: { agentToEdit = agent },
                             onFork: {
-                                forkPrefill = AgentPrefill(
-                                    name: agent.name + " (fork)",
-                                    avatar: agent.avatar,
-                                    folder: agent.folder,
-                                    agentType: agent.agentType,
-                                    insertAfterId: agent.id,
-                                    sessionId: agent.sessionId
-                                )
+                                forkPrefill = agent.forkPrefill()
                             },
                             onNewCompanion: {
-                                forkPrefill = AgentPrefill(
-                                    name: "",
-                                    avatar: nil,
-                                    folder: agent.folder,
-                                    agentType: "shell",
-                                    insertAfterId: agent.id,
-                                    createdBy: agent.id,
-                                    isCompanion: true
-                                )
+                                forkPrefill = agent.companionPrefill()
                             },
                             onShellCompanion: {
                                 agentManager.createShellCompanion(for: agent)
@@ -404,6 +389,17 @@ struct AgentRowView: View {
                     Text(agent.name)
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(Theme.primaryText)
+
+                    if let personaName = AppSettings.shared.persona(for: agent.personaId)?.name {
+                        HStack(spacing: 3) {
+                            Image(systemName: "person.fill")
+                                .font(.caption2)
+                            Text(personaName)
+                                .lineLimit(1)
+                        }
+                        .font(.callout)
+                        .foregroundColor(Theme.secondaryText)
+                    }
 
                     Text(agent.displayTitle.isEmpty ? "Ready" : agent.displayTitle)
                         .font(.callout)
