@@ -69,19 +69,12 @@ struct CodexHistoryProvider: ConversationHistoryProvider {
 
     /// If the DB title is empty or a skwad registration prompt, parse the rollout file for a real title
     private func resolveTitle(_ dbTitle: String, rolloutPath: String) -> String {
-        if !dbTitle.isEmpty && !isRegistrationPrompt(dbTitle) {
-            return truncateTitle(dbTitle)
+        if TitleUtils.isValidTitle(dbTitle) {
+            return TitleUtils.truncate(dbTitle)
         }
 
         // Fall back to parsing the rollout JSONL
         return titleFromRollout(path: rolloutPath) ?? ""
-    }
-
-    private func isRegistrationPrompt(_ text: String) -> Bool {
-        let lc = text.lowercased()
-        return lc.contains("you are part of a team of agents")
-            || lc.contains("register with the skwad")
-            || lc.contains("list other agents names and project")
     }
 
     /// Parse a Codex rollout JSONL file to find the first real user message
@@ -103,24 +96,12 @@ struct CodexHistoryProvider: ConversationHistoryProvider {
                 continue
             }
 
-            if isRegistrationPrompt(message) { continue }
+            if !TitleUtils.isValidTitle(message) { continue }
 
-            let firstLine = message.components(separatedBy: "\n").first ?? message
-            let trimmedLine = firstLine.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmedLine.isEmpty { continue }
-
-            return truncateTitle(trimmedLine)
+            return TitleUtils.extractTitle(message)
         }
 
         return nil
-    }
-
-    private func truncateTitle(_ text: String) -> String {
-        let firstLine = text.components(separatedBy: "\n").first ?? text
-        if firstLine.count > 80 {
-            return String(firstLine.prefix(77)) + "..."
-        }
-        return firstLine
     }
 
     /// Look up the rollout_path for a thread ID

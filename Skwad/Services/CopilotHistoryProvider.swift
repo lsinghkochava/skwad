@@ -72,20 +72,13 @@ struct CopilotHistoryProvider: ConversationHistoryProvider {
     // MARK: - Title Resolution
 
     private func resolveTitle(_ summary: String, sessionDir: String) -> String {
-        if !summary.isEmpty && !isRegistrationPrompt(summary) {
-            return truncateTitle(summary)
+        if TitleUtils.isValidTitle(summary) {
+            return TitleUtils.truncate(summary)
         }
 
         // Fall back to parsing events.jsonl for first real user message
         let eventsPath = (sessionDir as NSString).appendingPathComponent("events.jsonl")
         return titleFromEvents(path: eventsPath) ?? ""
-    }
-
-    private func isRegistrationPrompt(_ text: String) -> Bool {
-        let lc = text.lowercased()
-        return lc.contains("you are part of a team of agents")
-            || lc.contains("register with the skwad")
-            || lc.contains("list other agents names and project")
     }
 
     /// Parse events.jsonl to find the first real user message
@@ -106,24 +99,12 @@ struct CopilotHistoryProvider: ConversationHistoryProvider {
                 continue
             }
 
-            if isRegistrationPrompt(message) { continue }
+            if !TitleUtils.isValidTitle(message) { continue }
 
-            let firstLine = message.trimmingCharacters(in: .whitespacesAndNewlines)
-                .components(separatedBy: "\n").first ?? ""
-            if firstLine.isEmpty { continue }
-
-            return truncateTitle(firstLine)
+            return TitleUtils.extractTitle(message)
         }
 
         return nil
-    }
-
-    private func truncateTitle(_ text: String) -> String {
-        let firstLine = text.components(separatedBy: "\n").first ?? text
-        if firstLine.count > 80 {
-            return String(firstLine.prefix(77)) + "..."
-        }
-        return firstLine
     }
 
     private func parseISO8601(_ string: String) -> Date? {

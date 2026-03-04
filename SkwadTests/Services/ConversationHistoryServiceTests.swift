@@ -141,12 +141,23 @@ final class ClaudeHistoryProviderTests: XCTestCase {
 
     func testFormatsCommandMessageIndentedPattern() {
         writeJSONL("session1.jsonl", lines: [
-            userMessage("<command-name>/clear</command-name>\\n            <command-message>clear</command-message>\\n            <command-args></command-args>"),
+            userMessage("<command-name>/hold</command-name>\\n            <command-message>hold</command-message>\\n            <command-args></command-args>"),
             assistantMessage()
         ])
 
         let sessions = parseSessions()
-        XCTAssertEqual(sessions[0].title, "/clear")
+        XCTAssertEqual(sessions[0].title, "/hold")
+    }
+
+    func testSkipsClearCommand() {
+        writeJSONL("session1.jsonl", lines: [
+            userMessage("<command-name>/clear</command-name>\\n<command-args></command-args>"),
+            userMessage("Real task"),
+            assistantMessage()
+        ])
+
+        let sessions = parseSessions()
+        XCTAssertEqual(sessions[0].title, "Real task")
     }
 
     func testFormatsCommandMessageMultilineArgs() {

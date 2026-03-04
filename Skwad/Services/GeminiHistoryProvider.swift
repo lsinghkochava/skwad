@@ -89,8 +89,8 @@ struct GeminiHistoryProvider: ConversationHistoryProvider {
     // MARK: - Title Resolution
 
     private func resolveTitle(_ logMessage: String, sessionId: String, chatsDir: String) -> String {
-        if !isRegistrationPrompt(logMessage) {
-            return truncateTitle(logMessage)
+        if TitleUtils.isValidTitle(logMessage) {
+            return TitleUtils.truncate(logMessage)
         }
 
         // Fall back to parsing the chat JSON for the first real user message
@@ -101,13 +101,6 @@ struct GeminiHistoryProvider: ConversationHistoryProvider {
         }
 
         return ""
-    }
-
-    private func isRegistrationPrompt(_ text: String) -> Bool {
-        let lc = text.lowercased()
-        return lc.contains("you are part of a team of agents")
-            || lc.contains("register with the skwad")
-            || lc.contains("list other agents names and project")
     }
 
     /// Parse a Gemini chat JSON file to find the first real user message
@@ -125,12 +118,9 @@ struct GeminiHistoryProvider: ConversationHistoryProvider {
                 continue
             }
 
-            if isRegistrationPrompt(text) { continue }
+            if !TitleUtils.isValidTitle(text) { continue }
 
-            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty { continue }
-
-            return truncateTitle(trimmed)
+            return TitleUtils.extractTitle(text)
         }
 
         return nil
@@ -148,14 +138,6 @@ struct GeminiHistoryProvider: ConversationHistoryProvider {
             return (chatsDir as NSString).appendingPathComponent(file)
         }
         return nil
-    }
-
-    private func truncateTitle(_ text: String) -> String {
-        let firstLine = text.components(separatedBy: "\n").first ?? text
-        if firstLine.count > 80 {
-            return String(firstLine.prefix(77)) + "..."
-        }
-        return firstLine
     }
 
     private func parseISO8601(_ string: String) -> Date? {

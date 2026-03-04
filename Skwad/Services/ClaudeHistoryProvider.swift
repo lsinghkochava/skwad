@@ -88,29 +88,17 @@ struct ClaudeHistoryProvider: ConversationHistoryProvider {
                     continue
                 }
 
-                let lc = messageContent.lowercased()
-                if lc.contains("you are part of a team of agents") { continue }
-                if lc.contains("register with the skwad") { continue }
-                if lc.contains("list other agents names and project") { continue }
-
-                if messageContent.contains("<local-command-") { continue }
-
                 let cleaned: String
                 if messageContent.contains("<command-name>") {
                     cleaned = Self.formatCommandMessage(messageContent)
                     if cleaned.isEmpty { continue }
                 } else {
-                    let trimmedContent = messageContent.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if trimmedContent.isEmpty { continue }
-                    cleaned = trimmedContent
+                    cleaned = messageContent
                 }
 
-                let firstLine = cleaned.components(separatedBy: "\n").first ?? cleaned
-                if firstLine.count > 80 {
-                    title = String(firstLine.prefix(77)) + "..."
-                } else {
-                    title = firstLine
-                }
+                if !TitleUtils.isValidTitle(cleaned) { continue }
+
+                title = TitleUtils.extractTitle(cleaned)
             }
         }
 
