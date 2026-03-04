@@ -596,12 +596,13 @@ final class TerminalCommandBuilderTests: XCTestCase {
         settings.mcpServerEnabled = false
 
         let command = TerminalCommandBuilder.buildAgentCommand(
-            for: "codex",
+            for: "opencode",
             settings: settings,
             resumeSessionId: "abc-123"
         )
 
         XCTAssertFalse(command.contains("--resume"))
+        XCTAssertFalse(command.contains("resume"))
 
         settings.mcpServerEnabled = originalMCP
     }
@@ -659,6 +660,140 @@ final class TerminalCommandBuilderTests: XCTestCase {
         )
 
         XCTAssertTrue(command.contains("List other agents"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    // MARK: - Codex Resume (subcommand)
+
+    @MainActor
+    func testCodexResumeUsesSubcommand() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = false
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "codex",
+            settings: settings,
+            resumeSessionId: "thread-abc-123"
+        )
+
+        XCTAssertTrue(command.contains("resume thread-abc-123"))
+        XCTAssertFalse(command.contains("--resume"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testCodexForkUsesSubcommand() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = false
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "codex",
+            settings: settings,
+            resumeSessionId: "thread-abc-123",
+            forkSession: true
+        )
+
+        XCTAssertTrue(command.contains("fork thread-abc-123"))
+        XCTAssertFalse(command.contains("--fork-session"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    // MARK: - Gemini/Copilot Resume (flag)
+
+    @MainActor
+    func testGeminiResumeUsesFlag() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = false
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "gemini",
+            settings: settings,
+            resumeSessionId: "session-abc"
+        )
+
+        XCTAssertTrue(command.contains("--resume session-abc"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testCopilotResumeUsesFlag() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = false
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "copilot",
+            settings: settings,
+            resumeSessionId: "session-abc"
+        )
+
+        XCTAssertTrue(command.contains("--resume session-abc"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    // MARK: - Resume Skips Registration for No-System-Prompt Agents
+
+    @MainActor
+    func testGeminiResumeSkipsRegistration() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "gemini",
+            settings: settings,
+            agentId: UUID(),
+            resumeSessionId: "session-abc"
+        )
+
+        XCTAssertFalse(command.contains("--prompt-interactive"))
+        XCTAssertFalse(command.contains("Register with the skwad"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testCopilotResumeSkipsRegistration() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "copilot",
+            settings: settings,
+            agentId: UUID(),
+            resumeSessionId: "session-abc"
+        )
+
+        XCTAssertFalse(command.contains("--interactive"))
+        XCTAssertFalse(command.contains("Register with the skwad"))
+
+        settings.mcpServerEnabled = originalMCP
+    }
+
+    @MainActor
+    func testCodexResumeKeepsSystemPrompt() {
+        let settings = AppSettings.shared
+        let originalMCP = settings.mcpServerEnabled
+        settings.mcpServerEnabled = true
+
+        let command = TerminalCommandBuilder.buildAgentCommand(
+            for: "codex",
+            settings: settings,
+            agentId: UUID(),
+            resumeSessionId: "thread-abc"
+        )
+
+        XCTAssertTrue(command.contains("developer_instructions"))
+        XCTAssertFalse(command.contains("List other agents"))
 
         settings.mcpServerEnabled = originalMCP
     }

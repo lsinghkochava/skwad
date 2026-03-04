@@ -170,6 +170,9 @@
 		TS000041 /* NotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100040 /* NotificationServiceTests.swift */; };
 		TS000042 /* TerminalCommandBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100041 /* TerminalCommandBuilderTests.swift */; };
 		TS000043 /* ConversationHistoryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100042 /* ConversationHistoryServiceTests.swift */; };
+		TS000046 /* CodexHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100046 /* CodexHistoryProviderTests.swift */; };
+		TS000047 /* GeminiHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100047 /* GeminiHistoryProviderTests.swift */; };
+		TS000048 /* CopilotHistoryProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100048 /* CopilotHistoryProviderTests.swift */; };
 		TS000044 /* FuzzyScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100044 /* FuzzyScorerTests.swift */; };
 		TS000045 /* FileSearchServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100045 /* FileSearchServiceTests.swift */; };
 		UP000001 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = UP100001 /* UpdaterManager.swift */; };
@@ -366,6 +369,9 @@
 		TS100040 /* NotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceTests.swift; sourceTree = "<group>"; };
 		TS100041 /* TerminalCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCommandBuilderTests.swift; sourceTree = "<group>"; };
 		TS100042 /* ConversationHistoryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationHistoryServiceTests.swift; sourceTree = "<group>"; };
+		TS100046 /* CodexHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHistoryProviderTests.swift; sourceTree = "<group>"; };
+		TS100047 /* GeminiHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeminiHistoryProviderTests.swift; sourceTree = "<group>"; };
+		TS100048 /* CopilotHistoryProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotHistoryProviderTests.swift; sourceTree = "<group>"; };
 		TS100043 /* AgentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTests.swift; sourceTree = "<group>"; };
 		TS100044 /* FuzzyScorerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyScorerTests.swift; sourceTree = "<group>"; };
 		TS100045 /* FileSearchServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileSearchServiceTests.swift; sourceTree = "<group>"; };
@@ -845,7 +851,10 @@
 				TS500015 /* Mocks */,
 				8DBD635B2F47B3290049E5DC /* AutopilotServiceTests.swift */,
 				TS100045 /* FileSearchServiceTests.swift */,
+				TS100046 /* CodexHistoryProviderTests.swift */,
+				TS100048 /* CopilotHistoryProviderTests.swift */,
 				TS100042 /* ConversationHistoryServiceTests.swift */,
+				TS100047 /* GeminiHistoryProviderTests.swift */,
 				TS100040 /* NotificationServiceTests.swift */,
 				TS100036 /* RepoDiscoveryServiceTests.swift */,
 				TS100041 /* TerminalCommandBuilderTests.swift */,
@@ -1183,6 +1192,9 @@
 				TS000041 /* NotificationServiceTests.swift in Sources */,
 				TS000042 /* TerminalCommandBuilderTests.swift in Sources */,
 				TS000043 /* ConversationHistoryServiceTests.swift in Sources */,
+				TS000046 /* CodexHistoryProviderTests.swift in Sources */,
+				TS000047 /* GeminiHistoryProviderTests.swift in Sources */,
+				TS000048 /* CopilotHistoryProviderTests.swift in Sources */,
 				TS000044 /* FuzzyScorerTests.swift in Sources */,
 				TS000045 /* FileSearchServiceTests.swift in Sources */,
 				BN000003 /* BenchAgentTests.swift in Sources */,
