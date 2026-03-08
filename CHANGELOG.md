@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-03-08
+
+### Added
+- MCP tools for agents to list bench and deploy bench agents
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
+### Removed
+- N/A
+
+
 ## [1.7.0] - 2026-03-04
 
 **Personas** — Give your agents personality. Assign a persona when creating an agent to influence its coding style and philosophy. Want a TDD purist? Pick Kent Beck. Need raw performance focus? Go with John Carmack. Skwad ships with 6 built-in personas from legendary engineering minds, and you can create your own. Agents can also attach personas when they create new agents via MCP. Personas work with any agent that supports system prompts (Claude, Codex).

@@ -138,7 +138,12 @@ actor MCPToolHandler {
 
     private func createAgentToolDefinition() -> ToolDefinition {
         let personas = AppSettings.shared.personas
+        let benchAgents = AppSettings.shared.benchAgents
         var description = "Create a new agent in Skwad. Can optionally create a new git worktree for the agent. Note: shell agents are plain terminals without an AI agent, so do not try to send messages to them."
+        if !benchAgents.isEmpty {
+            let benchList = benchAgents.map { "\($0.name) [\($0.agentType)] at \($0.folder) (ID: \($0.id.uuidString))" }.joined(separator: ", ")
+            description += " Bench agents (pre-configured templates, prefer these when possible): \(benchList)."
+        }
         var personaIdDescription = "ID of a persona to apply. Only works with agents that support system prompts (claude, codex)."
         if !personas.isEmpty {
             let personaList = personas.map { "\($0.name) (\($0.id.uuidString))" }.joined(separator: ", ")
@@ -151,6 +156,7 @@ actor MCPToolHandler {
             inputSchema: ToolInputSchema(
                 properties: [
                     "agentId": PropertySchema(type: "string", description: "Your agent ID (used to track who created the agent)"),
+                    "benchAgentId": PropertySchema(type: "string", description: "ID of a bench agent to deploy. When provided, name/agentType/repoPath are optional and default to the bench agent's configuration."),
                     "name": PropertySchema(type: "string", description: "Name for the agent"),
                     "icon": PropertySchema(type: "string", description: "Emoji icon for the agent (e.g., '🤖')"),
                     "agentType": PropertySchema(type: "string", description: "Agent type: claude, codex, opencode, gemini, copilot, custom1, custom2, or shell"),
@@ -161,7 +167,7 @@ actor MCPToolHandler {
                     "command": PropertySchema(type: "string", description: "Command to run (only for shell agent type)"),
                     "personaId": PropertySchema(type: "string", description: personaIdDescription)
                 ],
-                required: ["name", "agentType", "repoPath"]
+                required: ["agentId"]
             )
         )
     }
@@ -342,31 +348,51 @@ actor MCPToolHandler {
     }
 
     private func handleCreateAgent(_ arguments: [String: Any]) async -> ToolCallResult {
-        guard let name = arguments["name"] as? String else {
-            return errorResult("Missing required parameter: name")
-        }
-        guard let agentType = arguments["agentType"] as? String else {
-            return errorResult("Missing required parameter: agentType")
-        }
-        guard let repoPath = arguments["repoPath"] as? String else {
-            return errorResult("Missing required parameter: repoPath")
+        guard let agentIdString = arguments["agentId"] as? String else {
+            return errorResult("Missing required parameter: agentId")
         }
 
-        let icon = arguments["icon"] as? String
+        // Resolve bench agent defaults if provided
+        var benchAgent: BenchAgent?
+        if let benchAgentIdString = arguments["benchAgentId"] as? String,
+           let benchAgentId = UUID(uuidString: benchAgentIdString) {
+            let benchAgents = await MainActor.run { AppSettings.shared.benchAgents }
+            guard let found = benchAgents.first(where: { $0.id == benchAgentId }) else {
+                return errorResult("Bench agent not found: \(benchAgentIdString)")
+            }
+            benchAgent = found
+        }
+
+        // Use explicit params with bench agent as fallback
+        let name = arguments["name"] as? String ?? benchAgent?.name
+        let icon = arguments["icon"] as? String ?? benchAgent?.avatar
+        let agentType = arguments["agentType"] as? String ?? benchAgent?.agentType
+        let repoPath = arguments["repoPath"] as? String ?? benchAgent?.folder
+
+        var missing: [String] = []
+        if name == nil { missing.append("name") }
+        if agentType == nil { missing.append("agentType") }
+        if repoPath == nil { missing.append("repoPath") }
+        if !missing.isEmpty {
+            return errorResult("Missing required parameters: \(missing.joined(separator: ", ")). Provide these or use benchAgentId to deploy from a template.")
+        }
+
+        guard let name, let agentType, let repoPath else {
+            return errorResult("Missing required parameters: name, agentType, repoPath")
+        }
+
         let createWorktree = arguments["createWorktree"] as? Bool ?? false
         let branchName = arguments["branchName"] as? String
         let companion = arguments["companion"] as? Bool ?? false
-        let shellCommand = arguments["command"] as? String
-        let personaId = (arguments["personaId"] as? String).flatMap { UUID(uuidString: $0) }
+        let shellCommand = arguments["command"] as? String ?? benchAgent?.shellCommand
+        let personaId = (arguments["personaId"] as? String).flatMap { UUID(uuidString: $0) } ?? benchAgent?.personaId
 
         // Validate branch name is provided if creating worktree
         if createWorktree && (branchName == nil || branchName!.isEmpty) {
             return errorResult("branchName is required when createWorktree is true")
         }
 
-        // Get the caller's agent ID to track who created this agent
-        let callerAgentIdString = arguments["agentId"] as? String
-        let createdBy = callerAgentIdString.flatMap { UUID(uuidString: $0) }
+        let createdBy = UUID(uuidString: agentIdString)
 
         let result = await mcpService.createAgent(
             name: name,
