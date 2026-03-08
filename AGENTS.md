@@ -181,6 +181,14 @@ When a function is too deeply embedded in a view or `@MainActor` class to test d
 
 Delete tests that only verify hardcoded constants, trivial math (`max/min`), string interpolation, or enum raw values — they add zero value.
 
+### Running Tests
+
+```bash
+xcodebuild test -scheme SkwadTests 2>&1 | grep -E "failed|FAILED|error:"
+```
+
+If the output is empty, all tests passed. If there are failures, the output will show which tests failed and the error messages.
+
 ### Manual testing checklist:
 1. Build and run (Cmd+R)
 2. Create agent from repo picker, verify terminal launches
