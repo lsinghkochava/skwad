@@ -7,6 +7,7 @@ struct GlobalDashboardView: View {
     @State private var sort: DashboardSort = .manual
     @State private var agentToEdit: Agent?
     @State private var now = Date()
+    @State private var containerWidth: CGFloat = 0
 
     /// Max agent count (+1 for add card) across all workspaces, so all sections share the same grid width.
     private var maxItemCount: Int {
@@ -46,6 +47,8 @@ struct GlobalDashboardView: View {
                     .padding(.top, 64)
                     .padding(.bottom, 24)
                 }
+                .onAppear { containerWidth = geo.size.width }
+                .onChange(of: geo.size.width) { _, newValue in containerWidth = newValue }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -89,6 +92,18 @@ struct GlobalDashboardView: View {
                 StatusSummaryView(agents: workspaceAgents)
 
                 Spacer()
+
+                if lastRowIsFull(workspaceAgents.count) {
+                    Button { addAgent(to: workspace) } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle")
+                                .font(.system(size: 16))
+                                .foregroundColor(Theme.secondaryText)
+                            Text("Add Agent")
+                        }.opacity(0.8)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
 
             // Agent cards grid
@@ -108,6 +123,15 @@ struct GlobalDashboardView: View {
                 )
             }
         }
+    }
+
+    private func gridColumnCount() -> Int {
+        let gridWidth = DashboardMetrics.gridWidth(for: containerWidth, itemCount: maxItemCount)
+        return max(1, Int((gridWidth + DashboardMetrics.gridSpacing) / (DashboardMetrics.cardWidth + DashboardMetrics.gridSpacing)))
+    }
+
+    private func lastRowIsFull(_ agentCount: Int) -> Bool {
+        agentCount > 0 && agentCount % gridColumnCount() == 0
     }
 
     // MARK: - Actions
