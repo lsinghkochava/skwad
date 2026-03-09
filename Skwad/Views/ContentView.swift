@@ -546,7 +546,7 @@ struct ContentView: View {
 
   @ViewBuilder
   private var sidebar: some View {
-    if !isAnyDashboardVisible && !agentManager.currentWorkspaceAgents.isEmpty && sidebarVisible {
+    if !agentManager.currentWorkspaceAgents.isEmpty && sidebarVisible {
       SidebarView(sidebarVisible: $sidebarVisible, forkPrefill: $forkPrefill, isCompact: Self.isSidebarCompact(width: sidebarWidth))
         .frame(width: sidebarWidth)
         .transition(.move(edge: .leading).combined(with: .opacity))
