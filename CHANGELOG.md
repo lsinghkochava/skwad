@@ -2,9 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.1] - 2026-03-08
+## [1.8.0] - WIP
 
 ### Added
+- Dashboard views (global and per-workspace) showing agent status, recent activity, and quick actions
 - MCP tools for agents to list bench and deploy bench agents
 
 ### Changed
