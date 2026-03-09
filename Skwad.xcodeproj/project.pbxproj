@@ -67,12 +67,11 @@
 		8DCB8BDC2F5DE27800A090B9 /* AgentCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BD82F5DE27800A090B9 /* AgentCardView.swift */; };
 		8DCB8BDD2F5DE27800A090B9 /* QuickPromptField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BD92F5DE27800A090B9 /* QuickPromptField.swift */; };
 		8DCB8BDE2F5DE27800A090B9 /* StatusSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BDA2F5DE27800A090B9 /* StatusSummaryView.swift */; };
-		8DCB8BE02F5DE3DA00A090B9 /* WorkspaceDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BDF2F5DE3DA00A090B9 /* WorkspaceDashboardView.swift */; };
-		8DCB8BE22F5DE4D300A090B9 /* GlobalDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BE12F5DE4D300A090B9 /* GlobalDashboardView.swift */; };
 		8DD8074D2F2E52E900D7A935 /* AgentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD8074C2F2E52E900D7A935 /* AgentSheet.swift */; };
 		8DDBB0772F5E2F900000173C /* HeaderTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB0762F5E2F900000173C /* HeaderTitleView.swift */; };
 		8DDBB0792F5E38EB0000173C /* DashboardSortPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB0782F5E38EB0000173C /* DashboardSortPicker.swift */; };
 		8DDBB07B2F5E62A20000173C /* AddAgentCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB07A2F5E62A20000173C /* AddAgentCardView.swift */; };
+		8DDBB07D2F5E69A00000173C /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB07C2F5E69A00000173C /* DashboardView.swift */; };
 		8DEF1A6B2F3DB4DB00247C2C /* plugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8DEF1A682F3DB49500247C2C /* plugin */; };
 		914A53BB8DBD66EC96B19BDA /* GitPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBECFB308DA186BC15E6AE50 /* GitPanelView.swift */; };
 		A0622F92A9748B402B7D8403 /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85319AD6169FDBF46AAE73E /* MenuItem.swift */; };
@@ -275,12 +274,11 @@
 		8DCB8BD82F5DE27800A090B9 /* AgentCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCardView.swift; sourceTree = "<group>"; };
 		8DCB8BD92F5DE27800A090B9 /* QuickPromptField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickPromptField.swift; sourceTree = "<group>"; };
 		8DCB8BDA2F5DE27800A090B9 /* StatusSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusSummaryView.swift; sourceTree = "<group>"; };
-		8DCB8BDF2F5DE3DA00A090B9 /* WorkspaceDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDashboardView.swift; sourceTree = "<group>"; };
-		8DCB8BE12F5DE4D300A090B9 /* GlobalDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalDashboardView.swift; sourceTree = "<group>"; };
 		8DD8074C2F2E52E900D7A935 /* AgentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSheet.swift; sourceTree = "<group>"; };
 		8DDBB0762F5E2F900000173C /* HeaderTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderTitleView.swift; sourceTree = "<group>"; };
 		8DDBB0782F5E38EB0000173C /* DashboardSortPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSortPicker.swift; sourceTree = "<group>"; };
 		8DDBB07A2F5E62A20000173C /* AddAgentCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAgentCardView.swift; sourceTree = "<group>"; };
+		8DDBB07C2F5E69A00000173C /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		8DEF1A682F3DB49500247C2C /* plugin */ = {isa = PBXFileReference; lastKnownFileType = folder; path = plugin; sourceTree = "<group>"; };
 		A486F6A72822BE9094B02DA7 /* CommitSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommitSheet.swift; sourceTree = "<group>"; };
 		AA100001 /* TranscriptAccumulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptAccumulator.swift; sourceTree = "<group>"; };
@@ -535,11 +533,10 @@
 				8DCB8BD82F5DE27800A090B9 /* AgentCardView.swift */,
 				60E80227F1254E4F8EE3870B /* DashboardAgentGrid.swift */,
 				8DDBB0782F5E38EB0000173C /* DashboardSortPicker.swift */,
+				8DDBB07C2F5E69A00000173C /* DashboardView.swift */,
 				D7E037AD7B4E4328B3903C83 /* GitStatsView.swift */,
-				8DCB8BE12F5DE4D300A090B9 /* GlobalDashboardView.swift */,
 				8DCB8BD92F5DE27800A090B9 /* QuickPromptField.swift */,
 				8DCB8BDA2F5DE27800A090B9 /* StatusSummaryView.swift */,
-				8DCB8BDF2F5DE3DA00A090B9 /* WorkspaceDashboardView.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
@@ -1088,7 +1085,6 @@
 				8DBD634E2F479A770049E5DC /* AutopilotSettingsView.swift in Sources */,
 				SR000004 /* TerminalCommandBuilder.swift in Sources */,
 				SR000006 /* TerminalSessionController.swift in Sources */,
-				8DCB8BE02F5DE3DA00A090B9 /* WorkspaceDashboardView.swift in Sources */,
 				SR000007 /* TerminalAdapter.swift in Sources */,
 				8D8C02FF2F53FBAE00A06866 /* ArtifactPanelView.swift in Sources */,
 				8D8C03002F53FBAE00A06866 /* MarkdownPanelView.swift in Sources */,
@@ -1107,7 +1103,6 @@
 				8DBD63542F479B570049E5DC /* TerminalSettingsView.swift in Sources */,
 				8DBD63552F479B570049E5DC /* VoiceSettingsView.swift in Sources */,
 				8DBD63562F479B570049E5DC /* MCPSettingsView.swift in Sources */,
-				8DCB8BE22F5DE4D300A090B9 /* GlobalDashboardView.swift in Sources */,
 				8DBD63572F479B570049E5DC /* CodingSettingsView.swift in Sources */,
 				8DBD63582F479B570049E5DC /* GeneralSettingsView.swift in Sources */,
 				WS000001 /* Workspace.swift in Sources */,
@@ -1197,6 +1192,7 @@
 				F4AB26B99E3CC3D579D72293 /* OpenWithProvider.swift in Sources */,
 				8DDBB0792F5E38EB0000173C /* DashboardSortPicker.swift in Sources */,
 				48E4A7F10E3C047EF657C139 /* OpenWithAppPicker.swift in Sources */,
+				8DDBB07D2F5E69A00000173C /* DashboardView.swift in Sources */,
 				UP000001 /* UpdaterManager.swift in Sources */,
 				BN000004 /* BenchSectionView.swift in Sources */,
 			);

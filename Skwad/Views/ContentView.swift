@@ -528,14 +528,14 @@ struct ContentView: View {
   private var dashboardOrSidebar: some View {
     // Global dashboard: takes over sidebar + content area
     if agentManager.showGlobalDashboard {
-      GlobalDashboardView(forkPrefill: $forkPrefill)
+      DashboardView(forkPrefill: $forkPrefill, workspaceId: nil)
         .transition(.opacity)
         .zIndex(1)
     }
 
     // Workspace dashboard: takes over sidebar + content area
     if !agentManager.showGlobalDashboard && agentManager.showDashboard {
-      WorkspaceDashboardView(forkPrefill: $forkPrefill)
+      DashboardView(forkPrefill: $forkPrefill, workspaceId: agentManager.currentWorkspaceId)
         .transition(.opacity)
         .zIndex(1)
     }

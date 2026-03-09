@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Pure agent card grid used by both GlobalDashboardView and WorkspaceDashboardView.
+/// Pure agent card grid used by DashboardView.
 /// Sort, timer, edit sheet, and sort picker are owned by the parent dashboard view.
 struct DashboardAgentGrid: View {
     @Environment(AgentManager.self) var agentManager

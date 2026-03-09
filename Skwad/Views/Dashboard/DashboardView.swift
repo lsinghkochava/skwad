@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct GlobalDashboardView: View {
+struct DashboardView: View {
     @Environment(AgentManager.self) var agentManager
     @ObservedObject private var settings = AppSettings.shared
     @Binding var forkPrefill: AgentPrefill?
@@ -9,9 +9,37 @@ struct GlobalDashboardView: View {
     @State private var now = Date()
     @State private var containerWidth: CGFloat = 0
 
-    /// Max agent count (+1 for add card) across all workspaces, so all sections share the same grid width.
+    /// Optional: show only this workspace. nil = show all workspaces.
+    let workspaceId: UUID?
+
+    private var workspaces: [Workspace] {
+        if let workspaceId, let ws = agentManager.workspaces.first(where: { $0.id == workspaceId }) {
+            return [ws]
+        }
+        return agentManager.workspaces
+    }
+
+    private var isGlobal: Bool { workspaceId == nil }
+
+    private var headerTitle: String {
+        if let workspaceId, let ws = agentManager.workspaces.first(where: { $0.id == workspaceId }) {
+            return ws.name
+        }
+        return "All Workspaces"
+    }
+
+    private var headerAgents: [Agent] {
+        if let workspaceId {
+            return agentManager.agents.filter { agent in
+                agentManager.workspaces.first(where: { $0.id == workspaceId })?.agentIds.contains(agent.id) == true
+            }
+        }
+        return agentManager.agents
+    }
+
+    /// Max agent count (+1 for add card) across displayed workspaces, so all sections share the same grid width.
     private var maxItemCount: Int {
-        let counts = agentManager.workspaces.map { workspace in
+        let counts = workspaces.map { workspace in
             workspace.agentIds.filter { id in
                 agentManager.agents.contains { $0.id == id && !$0.isCompanion }
             }.count
@@ -23,11 +51,11 @@ struct GlobalDashboardView: View {
         VStack(spacing: 0) {
             // Header (integrated in window title bar)
             HStack(spacing: 12) {
-                HeaderTitleView(title: "All Workspaces")
+                HeaderTitleView(title: headerTitle)
 
                 Spacer()
 
-                StatusSummaryView(agents: agentManager.agents)
+                StatusSummaryView(agents: headerAgents)
             }
             .frame(height: 32)
             .padding(.leading, 32)
@@ -38,7 +66,7 @@ struct GlobalDashboardView: View {
             GeometryReader { geo in
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 24) {
-                        ForEach(agentManager.workspaces) { workspace in
+                        ForEach(workspaces) { workspace in
                             workspaceSection(workspace)
                         }
                     }
@@ -80,14 +108,20 @@ struct GlobalDashboardView: View {
                     .fill(workspace.color)
                     .frame(width: 4, height: 24)
 
-                Button {
-                    navigateToWorkspaceDashboard(workspace)
-                } label: {
+                if isGlobal {
+                    Button {
+                        navigateToWorkspaceDashboard(workspace)
+                    } label: {
+                        Text(workspace.name)
+                            .font(.title2.bold())
+                            .foregroundColor(Theme.primaryText)
+                    }
+                    .buttonStyle(.plain)
+                } else {
                     Text(workspace.name)
                         .font(.title2.bold())
                         .foregroundColor(Theme.primaryText)
                 }
-                .buttonStyle(.plain)
 
                 StatusSummaryView(agents: workspaceAgents)
 
@@ -154,15 +188,21 @@ struct GlobalDashboardView: View {
     }
 
     private func navigateToAgent(_ agent: Agent, in workspace: Workspace) {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            agentManager.showGlobalDashboard = false
+        if isGlobal {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                agentManager.showGlobalDashboard = false
+            }
+            agentManager.switchToWorkspace(workspace.id)
+        } else {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                agentManager.showDashboard = false
+            }
         }
-        agentManager.switchToWorkspace(workspace.id)
         agentManager.selectAgent(agent.id)
     }
 }
 
-// MARK: - Preview
+// MARK: - Previews
 
 @MainActor private func previewGlobalDashboardManager() -> AgentManager {
     let m = AgentManager()
@@ -187,8 +227,29 @@ struct GlobalDashboardView: View {
     return m
 }
 
+@MainActor private func previewWorkspaceDashboardManager() -> (AgentManager, UUID) {
+    let m = AgentManager()
+    let agents = [
+        previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Implementing dashboard views", gitStats: .init(insertions: 156, deletions: 12, files: 5)),
+        previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .idle, gitStats: .init(insertions: 0, deletions: 0, files: 0)),
+        previewDashboardAgent("api", "🦊", "/Users/nbonamy/src/api", status: .input, title: "Awaiting API key"),
+    ]
+    m.agents = agents
+    let workspace = Workspace(name: "My Project", colorHex: WorkspaceColor.purple.rawValue, agentIds: agents.map { $0.id })
+    m.workspaces = [workspace]
+    m.currentWorkspaceId = workspace.id
+    return (m, workspace.id)
+}
+
 #Preview("Global Dashboard") {
-    GlobalDashboardView(forkPrefill: .constant(nil))
+    DashboardView(forkPrefill: .constant(nil), workspaceId: nil)
         .environment(previewGlobalDashboardManager())
+        .frame(width: 900, height: 600)
+}
+
+#Preview("Workspace Dashboard") {
+    let (manager, wsId) = previewWorkspaceDashboardManager()
+    DashboardView(forkPrefill: .constant(nil), workspaceId: wsId)
+        .environment(manager)
         .frame(width: 900, height: 600)
 }

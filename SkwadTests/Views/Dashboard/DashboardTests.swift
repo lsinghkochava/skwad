@@ -210,6 +210,55 @@ struct DashboardTests {
         }
     }
 
+    // MARK: - DashboardMetrics.gridWidth
+
+    @Suite("Grid Width Calculation")
+    struct GridWidthTests {
+
+        @Test("single item produces single column width")
+        func singleItem() {
+            let width = DashboardMetrics.gridWidth(for: 1200, itemCount: 1)
+            #expect(width == DashboardMetrics.cardWidth)
+        }
+
+        @Test("two items produces two column width")
+        func twoItems() {
+            let expected = DashboardMetrics.cardWidth * 2 + DashboardMetrics.gridSpacing
+            let width = DashboardMetrics.gridWidth(for: 1200, itemCount: 2)
+            #expect(width == expected)
+        }
+
+        @Test("item count caps columns when fewer items than fit")
+        func itemCountCapsColumns() {
+            // 1200 * 0.8 = 960, fits 3 columns (3*300 + 2*16 = 932)
+            let widthWith3 = DashboardMetrics.gridWidth(for: 1200, itemCount: 3)
+            let widthWith2 = DashboardMetrics.gridWidth(for: 1200, itemCount: 2)
+            #expect(widthWith2 < widthWith3)
+            #expect(widthWith2 == DashboardMetrics.cardWidth * 2 + DashboardMetrics.gridSpacing)
+        }
+
+        @Test("container too small for two columns returns single column")
+        func narrowContainer() {
+            // 400 * 0.8 = 320, fits only 1 column
+            let width = DashboardMetrics.gridWidth(for: 400, itemCount: 5)
+            #expect(width == DashboardMetrics.cardWidth)
+        }
+
+        @Test("max columns limited by 80% of container")
+        func maxColumnsLimited() {
+            // 800 * 0.8 = 640, fits 2 columns (2*300 + 16 = 616)
+            let width = DashboardMetrics.gridWidth(for: 800, itemCount: 10)
+            let expected = DashboardMetrics.cardWidth * 2 + DashboardMetrics.gridSpacing
+            #expect(width == expected)
+        }
+
+        @Test("zero items returns single column width")
+        func zeroItems() {
+            let width = DashboardMetrics.gridWidth(for: 1200, itemCount: 0)
+            #expect(width == DashboardMetrics.cardWidth)
+        }
+    }
+
     // MARK: - StatusSummaryView
 
     @Suite("Status Summary")
