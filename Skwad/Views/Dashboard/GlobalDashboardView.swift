@@ -8,6 +8,16 @@ struct GlobalDashboardView: View {
     @State private var agentToEdit: Agent?
     @State private var now = Date()
 
+    /// Max agent count (+1 for add card) across all workspaces, so all sections share the same grid width.
+    private var maxItemCount: Int {
+        let counts = agentManager.workspaces.map { workspace in
+            workspace.agentIds.filter { id in
+                agentManager.agents.contains { $0.id == id && !$0.isCompanion }
+            }.count
+        }
+        return (counts.max() ?? 0) + 1
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header (integrated in window title bar)
@@ -24,13 +34,18 @@ struct GlobalDashboardView: View {
             .background(settings.sidebarBackgroundColor)
 
             // Workspace sections
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 24) {
-                    ForEach(agentManager.workspaces) { workspace in
-                        workspaceSection(workspace)
+            GeometryReader { geo in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 24) {
+                        ForEach(agentManager.workspaces) { workspace in
+                            workspaceSection(workspace)
+                        }
                     }
+                    .frame(width: DashboardMetrics.gridWidth(for: geo.size.width, itemCount: maxItemCount))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 64)
+                    .padding(.bottom, 24)
                 }
-                .padding(24)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -88,10 +103,20 @@ struct GlobalDashboardView: View {
                     agentToEdit: $agentToEdit,
                     agents: workspaceAgents,
                     now: now,
-                    onAgentTap: { agent in navigateToAgent(agent, in: workspace) }
+                    onAgentTap: { agent in navigateToAgent(agent, in: workspace) },
+                    onAddAgent: { addAgent(to: workspace) }
                 )
             }
         }
+    }
+
+    // MARK: - Actions
+
+    private func addAgent(to workspace: Workspace) {
+        let folder = workspace.agentIds.compactMap { id in
+            agentManager.agents.first { $0.id == id }
+        }.first?.folder ?? ""
+        forkPrefill = AgentPrefill(name: "", avatar: nil, folder: folder, agentType: "claude", insertAfterId: workspace.agentIds.last)
     }
 
     // MARK: - Navigation

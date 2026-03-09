@@ -1,8 +1,18 @@
 import SwiftUI
 
 enum DashboardMetrics {
-    static let gridColumns = [GridItem(.adaptive(minimum: 300, maximum: 300), spacing: 16, alignment: .leading)]
+    static let cardWidth: CGFloat = 300
+    static let gridColumns = [GridItem(.adaptive(minimum: cardWidth, maximum: cardWidth), spacing: 16, alignment: .leading)]
     static let gridSpacing: CGFloat = 16
+
+    /// Exact width for N columns of cards (no trailing spacing).
+    /// Caps to itemCount so the grid is never wider than needed.
+    static func gridWidth(for containerWidth: CGFloat, itemCount: Int) -> CGFloat {
+        let maxWidth = containerWidth * 0.8
+        let maxColumns = max(1, Int((maxWidth + gridSpacing) / (cardWidth + gridSpacing)))
+        let columns = min(maxColumns, max(1, itemCount))
+        return CGFloat(columns) * cardWidth + CGFloat(columns - 1) * gridSpacing
+    }
 
     static func idleDuration(since date: Date, now: Date) -> String {
         let seconds = Int(now.timeIntervalSince(date))

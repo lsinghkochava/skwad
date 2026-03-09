@@ -11,6 +11,16 @@ struct DashboardAgentGrid: View {
     let agents: [Agent]
     let now: Date
     let onAgentTap: (Agent) -> Void
+    let onAddAgent: () -> Void
+
+    @State private var availableWidth: CGFloat = 0
+
+    private var showAddCard: Bool {
+        let cardWidth = DashboardMetrics.cardWidth
+        let spacing = DashboardMetrics.gridSpacing
+        let columns = max(1, Int((availableWidth + spacing) / (cardWidth + spacing)))
+        return agents.count % columns != 0
+    }
 
     var body: some View {
         LazyVGrid(columns: DashboardMetrics.gridColumns, alignment: .leading, spacing: DashboardMetrics.gridSpacing) {
@@ -37,6 +47,14 @@ struct DashboardAgentGrid: View {
                     )
                 }
             }
+
+            if showAddCard {
+                AddAgentCardView(onTap: onAddAgent)
+            }
         }
+        .background(GeometryReader { geo in
+            Color.clear.onAppear { availableWidth = geo.size.width }
+                .onChange(of: geo.size.width) { _, newValue in availableWidth = newValue }
+        })
     }
 }

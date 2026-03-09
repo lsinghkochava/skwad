@@ -28,15 +28,21 @@ struct WorkspaceDashboardView: View {
             .background(settings.sidebarBackgroundColor)
 
             // Card grid
-            ScrollView {
-                DashboardAgentGrid(
-                    forkPrefill: $forkPrefill,
-                    agentToEdit: $agentToEdit,
-                    agents: agents,
-                    now: now,
-                    onAgentTap: { agent in navigateToAgent(agent) }
-                )
-                .padding(24)
+            GeometryReader { geo in
+                ScrollView {
+                    DashboardAgentGrid(
+                        forkPrefill: $forkPrefill,
+                        agentToEdit: $agentToEdit,
+                        agents: agents,
+                        now: now,
+                        onAgentTap: { agent in navigateToAgent(agent) },
+                        onAddAgent: { addAgent() }
+                    )
+                    .frame(width: DashboardMetrics.gridWidth(for: geo.size.width, itemCount: agents.count + 1))
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 64)
+                    .padding(.bottom, 24)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -55,6 +61,12 @@ struct WorkspaceDashboardView: View {
     }
 
     // MARK: - Actions
+
+    private func addAgent() {
+        let folder = agents.first?.folder ?? ""
+        let lastAgentId = agentManager.currentWorkspace?.agentIds.last
+        forkPrefill = AgentPrefill(name: "", avatar: nil, folder: folder, agentType: "claude", insertAfterId: lastAgentId)
+    }
 
     private func navigateToAgent(_ agent: Agent) {
         agentManager.selectAgent(agent.id)
