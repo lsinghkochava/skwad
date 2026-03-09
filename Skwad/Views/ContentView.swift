@@ -50,7 +50,7 @@ struct ContentView: View {
   }
 
   private var isTerminalAreaCollapsed: Bool {
-    artifactExpanded || isAnyDashboardVisible
+    artifactExpanded
   }
 
   private var shouldShowEmptyState: Bool {
@@ -68,8 +68,19 @@ struct ContentView: View {
   var body: some View {
     HStack(spacing: 0) {
       workspaceBar
-      dashboardOrSidebar
-      terminalArea
+      ZStack {
+        // Sidebar + terminal always present underneath
+        HStack(spacing: 0) {
+          sidebar
+          terminalArea
+        }
+        // Dashboard overlays on top when active
+        if isAnyDashboardVisible {
+          dashboardOverlay
+            .transition(.opacity)
+            .zIndex(1)
+        }
+      }
       gitPanel
       artifactPanel
     }
@@ -216,9 +227,9 @@ struct ContentView: View {
     GeometryReader { geo in
       terminalStage(in: geo)
     }
-    .opacity(isTerminalAreaCollapsed ? 0 : 1)
-    .frame(width: isTerminalAreaCollapsed ? 0 : nil)
-    .allowsHitTesting(!isTerminalAreaCollapsed)
+    .opacity(artifactExpanded ? 0 : 1)
+    .frame(width: artifactExpanded ? 0 : nil)
+    .allowsHitTesting(!artifactExpanded && !isAnyDashboardVisible)
     .clipped()
   }
 
@@ -260,7 +271,7 @@ struct ContentView: View {
     return AgentTerminalView(
       agent: agent,
       paneIndex: paneIdx,
-      suppressFocus: showFileFinder,
+      suppressFocus: showFileFinder || isAnyDashboardVisible,
       sidebarVisible: $sidebarVisible,
       forkPrefill: $forkPrefill,
       onGitStatsTap: {
@@ -297,7 +308,7 @@ struct ContentView: View {
   }
 
   private func isTerminalVisible(_ agent: Agent) -> Bool {
-    !isAnyDashboardVisible && agentManager.activeAgentIds.contains(agent.id)
+    agentManager.activeAgentIds.contains(agent.id)
   }
 
   private func terminalRect(for agent: Agent, in size: CGSize, visible: Bool) -> CGRect {
@@ -525,21 +536,16 @@ struct ContentView: View {
   // MARK: - Dashboard / Sidebar
 
   @ViewBuilder
-  private var dashboardOrSidebar: some View {
-    // Global dashboard: takes over sidebar + content area
+  private var dashboardOverlay: some View {
     if agentManager.showGlobalDashboard {
       DashboardView(forkPrefill: $forkPrefill, workspaceId: nil)
-        .transition(.opacity)
-        .zIndex(1)
-    }
-
-    // Workspace dashboard: takes over sidebar + content area
-    if !agentManager.showGlobalDashboard && agentManager.showDashboard {
+    } else if agentManager.showDashboard {
       DashboardView(forkPrefill: $forkPrefill, workspaceId: agentManager.currentWorkspaceId)
-        .transition(.opacity)
-        .zIndex(1)
     }
+  }
 
+  @ViewBuilder
+  private var sidebar: some View {
     if !isAnyDashboardVisible && !agentManager.currentWorkspaceAgents.isEmpty && sidebarVisible {
       SidebarView(sidebarVisible: $sidebarVisible, forkPrefill: $forkPrefill, isCompact: Self.isSidebarCompact(width: sidebarWidth))
         .frame(width: sidebarWidth)

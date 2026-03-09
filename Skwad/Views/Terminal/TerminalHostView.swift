@@ -104,8 +104,8 @@ struct TerminalHostView: NSViewRepresentable {
     func updateNSView(_ nsView: TerminalContainerView, context: Context) {
         guard let terminal = nsView.terminal else { return }
 
-        // Skip everything when the terminal is not actually visible on screen
-        guard !nsView.visibleRect.isEmpty else { return }
+        // Skip layout and focus when the terminal is not visible
+        guard isActive else { return }
 
         // Keep terminal filling the container
         terminal.frame = nsView.bounds
@@ -114,7 +114,7 @@ struct TerminalHostView: NSViewRepresentable {
         applySettings(to: terminal)
 
         // Focus terminal when active
-        if isActive && !suppressFocus {
+        if !suppressFocus {
             DispatchQueue.main.async {
                 nsView.window?.makeFirstResponder(terminal)
             }
