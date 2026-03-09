@@ -36,7 +36,7 @@ final class NotificationServiceTests: XCTestCase {
         NotificationService.shared.setup(agentManager: manager)
 
         // Set agent to blocked first
-        manager.agents[1].status = .input
+        manager.agents[1].state = .input
 
         // This should be skipped (agent already blocked)
         // We can't easily assert on UNNotificationCenter, but we verify no crash

@@ -8,7 +8,7 @@ final class AgentTests: XCTestCase {
         XCTAssertEqual(agent.name, "Test")
         XCTAssertEqual(agent.folder, "/tmp/test")
         XCTAssertEqual(agent.agentType, "claude")
-        XCTAssertEqual(agent.status, .idle)
+        XCTAssertEqual(agent.state, .idle)
         XCTAssertFalse(agent.isRegistered)
     }
 
@@ -19,10 +19,10 @@ final class AgentTests: XCTestCase {
     }
 
     func testStatusColors() {
-        XCTAssertEqual(AgentStatus.idle.color, .green)
-        XCTAssertEqual(AgentStatus.running.color, .orange)
-        XCTAssertEqual(AgentStatus.input.color, .red)
-        XCTAssertEqual(AgentStatus.error.color, .red)
+        XCTAssertEqual(AgentState.idle.color, .green)
+        XCTAssertEqual(AgentState.running.color, .orange)
+        XCTAssertEqual(AgentState.input.color, .red)
+        XCTAssertEqual(AgentState.error.color, .red)
     }
 
     func testDetectsImageAvatar() {

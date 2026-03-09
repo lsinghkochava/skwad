@@ -7,16 +7,16 @@ final class AgentRowViewUITests: XCTestCase {
 
     // MARK: - Fixtures
 
-    private func makeAgent(name: String = "skwad", avatar: String = "🐱", folder: String = "/src/skwad", status: AgentStatus = .idle, title: String = "") -> Agent {
+    private func makeAgent(name: String = "skwad", avatar: String = "🐱", folder: String = "/src/skwad", status: AgentState = .idle, title: String = "") -> Agent {
         var agent = Agent(name: name, avatar: avatar, folder: folder)
-        agent.status = status
+        agent.state = status
         agent.terminalTitle = title
         return agent
     }
 
-    private func makeCompanion(name: String = "shell", avatar: String = "🐚", status: AgentStatus = .running) -> Agent {
+    private func makeCompanion(name: String = "shell", avatar: String = "🐚", status: AgentState = .running) -> Agent {
         var agent = Agent(name: name, avatar: avatar, folder: "/src/skwad")
-        agent.status = status
+        agent.state = status
         return agent
     }
 

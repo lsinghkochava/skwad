@@ -264,6 +264,55 @@ final class MCPToolHandlerTests: XCTestCase {
         settings.benchAgents = originalBench
     }
 
+    // MARK: - set-status Tool
+
+    func testSetStatusMissingAgentId() async {
+        let result = await handler.callTool(name: "set-status", arguments: [
+            "status": "Working on tests"
+        ])
+        XCTAssertEqual(result.isError, true)
+        XCTAssertTrue(result.content[0].text.contains("agentId"))
+    }
+
+    func testSetStatusMissingStatus() async {
+        let result = await handler.callTool(name: "set-status", arguments: [
+            "agentId": UUID().uuidString
+        ])
+        XCTAssertEqual(result.isError, true)
+        XCTAssertTrue(result.content[0].text.contains("status"))
+    }
+
+    func testSetStatusUnknownAgent() async {
+        let (provider, _) = MockAgentDataProvider.createTestSetup(agentCount: 1)
+        await coordinator.setAgentDataProvider(provider)
+
+        let result = await handler.callTool(name: "set-status", arguments: [
+            "agentId": UUID().uuidString,
+            "status": "Working"
+        ])
+        XCTAssertEqual(result.isError, true)
+        XCTAssertTrue(result.content[0].text.contains("not found"))
+    }
+
+    func testSetStatusSuccess() async {
+        let (provider, _) = MockAgentDataProvider.createTestSetup(agentCount: 1)
+        await coordinator.setAgentDataProvider(provider)
+
+        let agents = await provider.getAgents()
+        let agentId = agents[0].id.uuidString
+
+        let result = await handler.callTool(name: "set-status", arguments: [
+            "agentId": agentId,
+            "status": "Implementing auth module"
+        ])
+        XCTAssertEqual(result.isError, false)
+
+        let updated = await provider.getAgent(id: agents[0].id)
+        XCTAssertEqual(updated?.statusText, "Implementing auth module")
+    }
+
+    // MARK: - create-agent Tool
+
     func testCreateAgentWithPersonaIdPassesThrough() async {
         let (provider, _) = MockAgentDataProvider.createTestSetup(agentCount: 1)
         await coordinator.setAgentDataProvider(provider)

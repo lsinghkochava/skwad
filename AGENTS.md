@@ -184,10 +184,10 @@ Delete tests that only verify hardcoded constants, trivial math (`max/min`), str
 ### Running Tests
 
 ```bash
-xcodebuild test -scheme SkwadTests 2>&1 | grep -E "failed|FAILED|error:"
+make test
 ```
 
-If the output is empty, all tests passed. If there are failures, the output will show which tests failed and the error messages.
+This runs all tests and **always produces explicit output**: prints `ALL TESTS PASSED` on success or `TESTS FAILED` with error details on failure. The exit code is 0 on success, 1 on failure.
 
 ### Manual testing checklist:
 1. Build and run (Cmd+R)

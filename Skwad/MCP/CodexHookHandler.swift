@@ -12,7 +12,7 @@ struct CodexHookHandler {
 
     /// Handle Codex notify events (agent-turn-complete).
     /// Returns the parsed AgentStatus or nil on error.
-    func handleActivityStatus(agentId: UUID, json: [String: Any]) async -> AgentStatus? {
+    func handleActivityStatus(agentId: UUID, json: [String: Any]) async -> AgentState? {
         let payload = json["payload"] as? [String: Any]
         let eventType = payload?["type"] as? String
 

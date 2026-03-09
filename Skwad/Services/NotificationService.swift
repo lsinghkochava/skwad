@@ -29,7 +29,7 @@ final class NotificationService: NSObject, UNUserNotificationCenterDelegate {
 
         // Skip if agent is already awaiting input (second hook for same event)
         if let current = agentManager?.agents.first(where: { $0.id == agent.id }),
-           current.status == .input { return }
+           current.state == .input { return }
 
         // Skip if agent is currently displayed
         if let manager = agentManager,

@@ -356,6 +356,7 @@ enum MCPToolName: String {
     case createAgent = "create-agent"
     case closeAgent = "close-agent"
     case createWorktree = "create-worktree"
+    case setStatus = "set-status"
     case displayMarkdown = "display-markdown"
     case viewMermaid = "view-mermaid"
 }

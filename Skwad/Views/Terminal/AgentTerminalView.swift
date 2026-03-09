@@ -169,32 +169,17 @@ struct AgentFullHeader: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 8) {
                         Circle()
-                            .fill(agent.status.color)
+                            .fill(agent.state.color)
                             .frame(width: 10, height: 10)
-                        Text(agent.status.rawValue)
+                        Text(agent.state.rawValue)
                             .font(.body)
                             .foregroundColor(Theme.secondaryText)
                             .lineLimit(1)
                     }
 
                     if let stats = agent.gitStats {
-                        if stats.insertions == 0 && stats.deletions == 0 {
-                            Text("Clean")
-                                .foregroundColor(Theme.secondaryText)
-                                .font(.body)
-                                .lineLimit(1)
-                        } else {
-                            HStack(spacing: 8) {
-                                Text("+\(stats.insertions)")
-                                    .foregroundColor(.green)
-                                    .font(.body.monospaced())
-                                    .lineLimit(1)
-                                Text("-\(stats.deletions)")
-                                    .foregroundColor(.red)
-                                    .font(.body.monospaced())
-                                    .lineLimit(1)
-                            }
-                        }
+                        GitStatsView(stats: stats, font: .body, monospaced: true)
+                            .lineLimit(1)
                     } else {
                         Text("Getting stats...")
                             .foregroundColor(Theme.secondaryText)
@@ -316,9 +301,9 @@ struct AgentCompactHeader: View {
             if !agent.isShell {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(agent.status.color)
+                        .fill(agent.state.color)
                         .frame(width: 8, height: 8)
-                    Text(agent.status.rawValue)
+                    Text(agent.state.rawValue)
                         .font(.callout)
                         .foregroundColor(Theme.secondaryText)
                 }
@@ -342,18 +327,10 @@ private func shortenPath(_ path: String) -> String {
 
 // MARK: - Preview
 
-private func previewAgent(_ name: String, _ avatar: String, _ folder: String, status: AgentStatus = .idle, title: String = "", stats: GitLineStats? = nil) -> Agent {
-    var agent = Agent(name: name, avatar: avatar, folder: folder)
-    agent.status = status
-    agent.terminalTitle = title
-    agent.gitStats = stats
-    return agent
-}
-
 @MainActor private func previewAgentManager() -> AgentManager {
-    let skwad = previewAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift", stats: .init(insertions: 42, deletions: 7, files: 3))
-    let witsy = previewAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .idle, stats: .init(insertions: 0, deletions: 0, files: 0))
-    let broken = previewAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error)
+    let skwad = previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift", gitStats: .init(insertions: 42, deletions: 7, files: 3))
+    let witsy = previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .idle, gitStats: .init(insertions: 0, deletions: 0, files: 0))
+    let broken = previewDashboardAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error)
     let m = AgentManager()
     m.agents = [skwad, witsy, broken]
     m.activeAgentIds = [skwad.id, witsy.id]
@@ -376,11 +353,11 @@ private func previewAgent(_ name: String, _ avatar: String, _ folder: String, st
 
 #Preview("Compact Header") {
     VStack(spacing: 0) {
-      AgentCompactHeader(agent: previewAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift"), paneIndex: 0, onShowSidebar: {})
+      AgentCompactHeader(agent: previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift"), paneIndex: 0, onShowSidebar: {})
         Divider()
-      AgentCompactHeader(agent: previewAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .idle), paneIndex: 1, onShowSidebar: {})
+      AgentCompactHeader(agent: previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .idle), paneIndex: 1, onShowSidebar: {})
         Divider()
-      AgentCompactHeader(agent: previewAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), paneIndex: 1, onShowSidebar: {})
+      AgentCompactHeader(agent: previewDashboardAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), paneIndex: 1, onShowSidebar: {})
     }
     .frame(width: 600)
 }

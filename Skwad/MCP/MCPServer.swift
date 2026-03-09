@@ -32,7 +32,7 @@ actor MCPServer: MCPTransportProtocol {
         }
 
         // Debug status endpoint
-        router.get("/status") { [self] request, context in
+        router.get("/") { [self] request, context in
             await handleStatus(request, context: context)
         }
 
@@ -180,7 +180,8 @@ actor MCPServer: MCPTransportProtocol {
                 "agent_id": agent.id.uuidString,
                 "name": agent.name,
                 "folder": agent.folder,
-                "status": agent.status.rawValue,
+                "state": agent.state.rawValue,
+                "status": agent.statusText,
                 "registered": agent.isRegistered,
                 "agent_type": agent.agentType,
             ]

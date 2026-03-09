@@ -107,10 +107,11 @@ struct AgentContextMenu<Content: View>: View {
             Divider()
 
             if visibility.showMoveToWorkspace {
-                // Move to Workspace submenu (only show if there are other workspaces)
-                if agentManager.workspaces.count > 1 {
+                // Move to Workspace submenu (exclude the workspace the agent belongs to)
+                let agentWorkspaceId = agentManager.workspaces.first(where: { $0.agentIds.contains(agent.id) })?.id
+                if let agentWorkspaceId, agentManager.workspaces.count > 1 {
                     Menu {
-                        ForEach(agentManager.workspaces.filter { $0.id != agentManager.currentWorkspaceId }) { workspace in
+                        ForEach(agentManager.workspaces.filter { $0.id != agentWorkspaceId }) { workspace in
                             Button {
                                 agentManager.moveAgentToWorkspace(agent, to: workspace.id)
                             } label: {

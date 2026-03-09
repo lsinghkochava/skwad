@@ -1,4 +1,4 @@
-.PHONY: help build clean archive export notarize dmg release install increment-build appcast get-version get-build set-version prerelease latest check-changelog
+.PHONY: help build test clean archive export notarize dmg release install increment-build appcast get-version get-build set-version prerelease latest check-changelog
 
 # Load .env file if it exists
 -include .env
@@ -35,6 +35,7 @@ help:
 	@echo "  make latest       - Trigger GitHub Action build (latest release)"
 	@echo ""
 	@echo "Other targets:"
+	@echo "  make test         - Run all tests (always produces output)"
 	@echo "  make build        - Build the app in Release configuration"
 	@echo "  make archive      - Create an archive for distribution"
 	@echo "  make export       - Export and sign the app (requires archive)"
@@ -50,6 +51,12 @@ help:
 	@echo "  TEAM_ID               - Team ID (current: $(TEAM_ID))"
 	@echo "  APP_PASSWORD          - App-specific password for notarization"
 	@echo "  SIGNING_CERTIFICATE   - Code signing certificate name (current: $(SIGNING_CERTIFICATE))"
+
+test:
+	@echo "Running tests..."
+	@xcodebuild test -scheme SkwadTests 2>&1 | tee /dev/stderr | grep -qE "failed|FAILED|error:" \
+		&& { echo ""; echo "TESTS FAILED"; exit 1; } \
+		|| { echo ""; echo "ALL TESTS PASSED"; }
 
 build:
 	@echo "Building $(APP_NAME)..."

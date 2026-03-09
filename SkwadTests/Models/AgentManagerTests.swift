@@ -775,7 +775,7 @@ struct AgentManagerTests {
         @MainActor
         func workspaceStatusReturnsRunningIfRunning() async {
             let manager = AgentManagerTests.setupManager(agentCount: 2)
-            manager.agents[0].status = .running
+            manager.agents[0].state = .running
 
             let status = manager.workspaceStatus(manager.currentWorkspace!)
 
@@ -796,8 +796,8 @@ struct AgentManagerTests {
         @MainActor
         func workspaceStatusReturnsInputIfInput() async {
             let manager = AgentManagerTests.setupManager(agentCount: 2)
-            manager.agents[0].status = .running
-            manager.agents[1].status = .input
+            manager.agents[0].state = .running
+            manager.agents[1].state = .input
 
             let status = manager.workspaceStatus(manager.currentWorkspace!)
 
@@ -814,33 +814,33 @@ struct AgentManagerTests {
         @MainActor
         func terminalOutputAcceptedForHookAgent() async {
             let manager = AgentManagerTests.setupManager(agentCount: 1, agentType: "claude")
-            manager.agents[0].status = .idle
+            manager.agents[0].state = .idle
 
             manager.updateStatus(for: manager.agents[0].id, status: .running, source: .terminal)
 
-            #expect(manager.agents[0].status == .running)
+            #expect(manager.agents[0].state == .running)
         }
 
         @Test("hook source is accepted for hook agents (claude)")
         @MainActor
         func hookSourceAcceptedForHookAgent() async {
             let manager = AgentManagerTests.setupManager(agentCount: 1, agentType: "claude")
-            manager.agents[0].status = .idle
+            manager.agents[0].state = .idle
 
             manager.updateStatus(for: manager.agents[0].id, status: .running, source: .hook)
 
-            #expect(manager.agents[0].status == .running)
+            #expect(manager.agents[0].state == .running)
         }
 
         @Test("terminal output is accepted for non-hook agents")
         @MainActor
         func terminalOutputAcceptedForNonHookAgent() async {
             let manager = AgentManagerTests.setupManager(agentCount: 1, agentType: "codex")
-            manager.agents[0].status = .idle
+            manager.agents[0].state = .idle
 
             manager.updateStatus(for: manager.agents[0].id, status: .running, source: .terminal)
 
-            #expect(manager.agents[0].status == .running)
+            #expect(manager.agents[0].state == .running)
         }
     }
 
@@ -1088,7 +1088,7 @@ struct AgentManagerTests {
             let agentId = manager.agents[0].id
 
             // Set various runtime state
-            manager.agents[0].status = .running
+            manager.agents[0].state = .running
             manager.agents[0].isRegistered = true
             manager.agents[0].sessionId = "old-session"
             manager.agents[0].resumeSessionId = "resume-session"
@@ -1098,7 +1098,7 @@ struct AgentManagerTests {
             manager.restartAgent(manager.agents[0])
 
             let agent = manager.agents.first(where: { $0.id == agentId })!
-            #expect(agent.status == .idle)
+            #expect(agent.state == .idle)
             #expect(agent.isRegistered == false)
             #expect(agent.sessionId == nil)
             #expect(agent.resumeSessionId == nil)
@@ -1156,12 +1156,12 @@ struct AgentManagerTests {
         func resumeSessionClearsRegistration() async {
             let manager = AgentManagerTests.setupManager(agentCount: 1)
             manager.agents[0].isRegistered = true
-            manager.agents[0].status = .running
+            manager.agents[0].state = .running
 
             manager.resumeSession(manager.agents[0], sessionId: "new-session")
 
             #expect(manager.agents[0].isRegistered == false)
-            #expect(manager.agents[0].status == .idle)
+            #expect(manager.agents[0].state == .idle)
         }
 
         @Test("resumeSession generates new restart token")

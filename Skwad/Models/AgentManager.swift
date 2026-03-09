@@ -33,6 +33,12 @@ final class AgentManager {
     // All agents across all workspaces
     var agents: [Agent] = []
 
+    // Global dashboard state (persisted via AppSettings)
+    var showGlobalDashboard: Bool {
+        get { settings.showGlobalDashboard }
+        set { settings.showGlobalDashboard = newValue }
+    }
+
     // Workspaces
     var workspaces: [Workspace] = []
     var currentWorkspaceId: UUID?
@@ -127,6 +133,11 @@ final class AgentManager {
         set { updateCurrentWorkspace { $0.splitRatioSecondary = newValue } }
     }
 
+    var showDashboard: Bool {
+        get { currentWorkspace?.isDashboardVisible ?? false }
+        set { updateCurrentWorkspace { $0.isDashboardVisible = newValue } }
+    }
+
     private func updateCurrentWorkspace(_ update: (inout Workspace) -> Void) {
         guard let id = currentWorkspaceId,
               var workspace = workspaces.first(where: { $0.id == id }),
@@ -198,9 +209,9 @@ final class AgentManager {
     }
 
     /// Returns the "worst" status across all agents in a workspace (input > running > idle)
-    func workspaceStatus(_ workspace: Workspace) -> AgentStatus? {
+    func workspaceStatus(_ workspace: Workspace) -> AgentState? {
         let statuses = workspace.agentIds.compactMap { agentId in
-            agents.first { $0.id == agentId }?.status
+            agents.first { $0.id == agentId }?.state
         }
         if statuses.contains(.input) { return .input }
         if statuses.contains(.running) { return .running }
@@ -276,7 +287,7 @@ final class AgentManager {
             // Set running so UI shows "Working" while agent boots up
             // Skip for resumed sessions — agent stays idle until user sends input
             if agent.resumeSessionId == nil, let index = agents.firstIndex(where: { $0.id == agent.id }) {
-                agents[index].status = .running
+                agents[index].state = .running
             }
         } else {
             tracking = .all
@@ -460,7 +471,7 @@ final class AgentManager {
 
     /// Inject the registration prompt into an agent's terminal
     func registerAgent(_ agent: Agent) {
-        let text = "You are part of a team of agents called a skwad. Register within the skwad with your agent ID: \(agent.id.uuidString). A skwad is made of  high-performing agents who collaborate to achieve complex goals so engage with them: ask for help and in return help them succeed."
+        let text = TerminalCommandBuilder.registrationPrompt(agentId: agent.id)
         injectText(text, for: agent.id)
     }
 
@@ -483,6 +494,12 @@ final class AgentManager {
     func updateMetadata(for agentId: UUID, metadata: [String: String]) {
         if let index = agents.firstIndex(where: { $0.id == agentId }) {
             agents[index].metadata.merge(metadata) { _, new in new }
+        }
+    }
+
+    func setAgentStatusText(for agentId: UUID, status: String) {
+        if let index = agents.firstIndex(where: { $0.id == agentId }) {
+            agents[index].statusText = status
         }
     }
 
@@ -518,11 +535,11 @@ final class AgentManager {
             agents.append(agent)
         }
 
-        // Determine target workspace: use creator's workspace if available, else current
+        // Determine target workspace: use source agent's workspace if available, else current
         let workspaceId: UUID
-        if let creatorId = createdBy,
-           let creatorWorkspace = workspaces.first(where: { $0.agentIds.contains(creatorId) }) {
-            workspaceId = creatorWorkspace.id
+        if let sourceId = createdBy ?? insertAfterId,
+           let sourceWorkspace = workspaces.first(where: { $0.agentIds.contains(sourceId) }) {
+            workspaceId = sourceWorkspace.id
         } else {
             workspaceId = ensureWorkspaceExists()
         }
@@ -657,27 +674,15 @@ final class AgentManager {
         saveAgents()
     }
 
-    @discardableResult
-    func createDuplicateAgent(_ agent: Agent, nameSuffix: String = " (copy)") -> Agent {
-        var newAgent = Agent(folder: agent.folder, avatar: agent.avatar, agentType: agent.agentType, personaId: agent.personaId)
-        newAgent.name = agent.name + nameSuffix
-
-        // Add to master list
-        agents.append(newAgent)
-
-        // Add to current workspace
-        if let workspaceId = currentWorkspaceId,
-           let index = workspaces.firstIndex(where: { $0.id == workspaceId }) {
-            workspaces[index].agentIds.append(newAgent.id)
-        }
-
-        saveAgents()
-        saveWorkspaces()
-        return newAgent
-    }
-
     func duplicateAgent(_ agent: Agent) {
-        _ = createDuplicateAgent(agent)
+        addAgent(
+            folder: agent.folder,
+            name: agent.name + " (copy)",
+            avatar: agent.avatar,
+            agentType: agent.agentType,
+            insertAfterId: agent.id,
+            personaId: agent.personaId
+        )
     }
 
     func createShellCompanion(for agent: Agent) {
@@ -734,7 +739,7 @@ final class AgentManager {
         removeController(for: agent.id)
         unregisterTerminal(for: agent.id)
         agents[index].restartToken = UUID()
-        agents[index].status = .idle
+        agents[index].state = .idle
         agents[index].isRegistered = false
         agents[index].terminalTitle = ""
     }
@@ -773,9 +778,8 @@ final class AgentManager {
     }
 
     func moveAgentToWorkspace(_ agent: Agent, to targetWorkspaceId: UUID) {
-        guard let sourceWorkspaceId = currentWorkspaceId,
-              sourceWorkspaceId != targetWorkspaceId,
-              let sourceIndex = workspaces.firstIndex(where: { $0.id == sourceWorkspaceId }),
+        guard let sourceIndex = workspaces.firstIndex(where: { $0.agentIds.contains(agent.id) }),
+              workspaces[sourceIndex].id != targetWorkspaceId,
               let targetIndex = workspaces.firstIndex(where: { $0.id == targetWorkspaceId }) else { return }
 
         // Remove from source workspace
@@ -798,10 +802,11 @@ final class AgentManager {
         settings.saveAgents(agents)
     }
 
-    func updateStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource = .terminal) {
+    func updateStatus(for agentId: UUID, status: AgentState, source: ActivitySource = .terminal) {
         if let index = agents.firstIndex(where: { $0.id == agentId }) {
-            guard agents[index].status != status else { return }
-            agents[index].status = status
+            guard agents[index].state != status else { return }
+            agents[index].state = status
+            agents[index].lastStatusChange = Date()
             if source == .hook {
                 controllers[agentId]?.cancelInputProtection()
             }

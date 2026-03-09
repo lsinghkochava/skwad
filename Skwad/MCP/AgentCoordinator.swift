@@ -22,13 +22,14 @@ protocol AgentDataProvider: Sendable {
     func getAgentsInSameWorkspace(as agentId: UUID) async -> [Agent]
     func setRegistered(for agentId: UUID, registered: Bool) async
     func setSessionId(for agentId: UUID, sessionId: String) async
-    func updateAgentStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource) async
+    func updateAgentStatus(for agentId: UUID, status: AgentState, source: ActivitySource) async
     func injectText(_ text: String, for agentId: UUID) async
     func addAgent(folder: String, name: String, avatar: String?, agentType: String, createdBy: UUID?, companion: Bool, shellCommand: String?, personaId: UUID?) async -> UUID?
     func removeAgent(id: UUID) async -> Bool
     func showMarkdownPanel(filePath: String, maximized: Bool, agentId: UUID) async -> Bool
     func showMermaidPanel(source: String, title: String?, agentId: UUID) async -> Bool
     func updateMetadata(for agentId: UUID, metadata: [String: String]) async
+    func setAgentStatus(for agentId: UUID, status: String) async
 }
 
 // MARK: - Agent Coordinator
@@ -85,7 +86,7 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
                 id: agent.id.uuidString,
                 name: agent.name,
                 folder: agent.folder,
-                status: agent.status.rawValue,
+                status: agent.state.rawValue,
                 isRegistered: agent.isRegistered
             )
         }
@@ -226,7 +227,7 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
         await messageStore.add(message)
 
         // If recipient is idle, notify them they have a message
-        if recipient.status == .idle {
+        if recipient.state == .idle {
             await notifyAgentOfMessage(recipient, messageId: message.id)
         }
 
@@ -339,7 +340,7 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
                 id: agent.id.uuidString,
                 name: agent.name,
                 folder: agent.folder,
-                status: agent.status.rawValue,
+                status: agent.state.rawValue,
                 isRegistered: agent.isRegistered
             )
         }
@@ -437,6 +438,12 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
         }
     }
 
+    // MARK: - Agent Status
+
+    func setAgentStatus(for agentId: UUID, status: String) async {
+        await agentDataProvider?.setAgentStatus(for: agentId, status: status)
+    }
+
     // MARK: - Agent Closing
 
     func closeAgent(callerAgentId: UUID, targetIdentifier: String) async -> CloseAgentResponse {
@@ -499,7 +506,7 @@ actor AgentCoordinator: AgentCoordinatorProtocol {
     }
 
     /// Update agent status from hook-based activity detection
-    func updateAgentStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource) async {
+    func updateAgentStatus(for agentId: UUID, status: AgentState, source: ActivitySource) async {
         guard let provider = agentDataProvider else { return }
         await provider.updateAgentStatus(for: agentId, status: status, source: source)
     }
@@ -583,7 +590,7 @@ final class AgentManagerWrapper: AgentDataProvider, @unchecked Sendable {
         }
     }
 
-    func updateAgentStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource) async {
+    func updateAgentStatus(for agentId: UUID, status: AgentState, source: ActivitySource) async {
         await MainActor.run {
             manager?.updateStatus(for: agentId, status: status, source: source)
         }
@@ -641,6 +648,12 @@ final class AgentManagerWrapper: AgentDataProvider, @unchecked Sendable {
     func updateMetadata(for agentId: UUID, metadata: [String: String]) async {
         await MainActor.run {
             manager?.updateMetadata(for: agentId, metadata: metadata)
+        }
+    }
+
+    func setAgentStatus(for agentId: UUID, status: String) async {
+        await MainActor.run {
+            manager?.setAgentStatusText(for: agentId, status: status)
         }
     }
 }

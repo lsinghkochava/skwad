@@ -43,7 +43,7 @@ class TerminalSessionController: ObservableObject {
 
     /// Current session state
     /// Agents with no activity tracking (shell) are forced to .idle
-    var status: AgentStatus {
+    var status: AgentState {
         get { activityTracking.isEmpty ? .idle : _status }
         set {
             let effective = activityTracking.isEmpty ? .idle : newValue
@@ -53,7 +53,7 @@ class TerminalSessionController: ObservableObject {
             statusDidChange(from: oldValue, to: effective)
         }
     }
-    @Published private var _status: AgentStatus = .idle
+    @Published private var _status: AgentState = .idle
 
     /// Unique identifier for this terminal session
     let agentId: UUID
@@ -83,7 +83,7 @@ class TerminalSessionController: ObservableObject {
     // MARK: - Dependencies
 
     private let settings = AppSettings.shared
-    private let onStatusChange: (_ status: AgentStatus, _ source: ActivitySource) -> Void
+    private let onStatusChange: (_ status: AgentState, _ source: ActivitySource) -> Void
     private let onTitleChange: ((String) -> Void)?
     private let onCheckMessages: (() -> Void)?
 
@@ -133,7 +133,7 @@ class TerminalSessionController: ObservableObject {
         forkSession: Bool = false,
         activityTracking: ActivityTracking = .all,
         idleTimeout: TimeInterval = TimingConstants.idleTimeout,
-        onStatusChange: @escaping (_ status: AgentStatus, _ source: ActivitySource) -> Void,
+        onStatusChange: @escaping (_ status: AgentState, _ source: ActivitySource) -> Void,
         onTitleChange: ((String) -> Void)? = nil,
         onCheckMessages: (() -> Void)? = nil
     ) {
@@ -408,7 +408,7 @@ class TerminalSessionController: ObservableObject {
         
         // Set registration text if not already set
         if registrationText == nil {
-            registrationText = "You are part of a team of agents called a skwad. Register within the skwad with your agent ID: \(agentId.uuidString). A skwad is made of  high-performing agents who collaborate to achieve complex goals so engage with them: ask for help and in return help them succeed."
+            registrationText = TerminalCommandBuilder.registrationPrompt(agentId: agentId)
         }
 
         let readyAt = Date().addingTimeInterval(delay)
@@ -507,7 +507,7 @@ class TerminalSessionController: ObservableObject {
         injectText(text)
     }
     
-    private func statusDidChange(from oldValue: AgentStatus, to newValue: AgentStatus) {
+    private func statusDidChange(from oldValue: AgentState, to newValue: AgentState) {
         onStatusChange(newValue, lastActivitySource)
         lastActivitySource = .terminal
     }

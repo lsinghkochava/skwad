@@ -110,6 +110,17 @@ actor MCPToolHandler {
                 )
             ),
             ToolDefinition(
+                name: MCPToolName.setStatus.rawValue,
+                description: "MANDATORY: Set your status so other agents know what you are doing. Call before starting any task, after completing it, and when changing direction. Keep it short and specific (e.g. 'Implementing auth module', 'Running tests', 'Done — PR ready'). Use empty string to clear.",
+                inputSchema: ToolInputSchema(
+                    properties: [
+                        "agentId": PropertySchema(type: "string", description: "Your agent ID"),
+                        "status": PropertySchema(type: "string", description: "Short status text describing what you are currently doing. Use empty string to clear.")
+                    ],
+                    required: ["agentId", "status"]
+                )
+            ),
+            ToolDefinition(
                 name: MCPToolName.displayMarkdown.rawValue,
                 description: "Display a markdown file in a panel for the user to review. Use this to show plans, documentation, or any markdown content that needs user attention. Also use if the user asks you to show him a file. Never assume the panel is open or displaying the right file as the user may have closed it: call the tool again when relevant.",
                 inputSchema: ToolInputSchema(
@@ -198,6 +209,8 @@ actor MCPToolHandler {
             return await handleCreateAgent(arguments)
         case .closeAgent:
             return await handleCloseAgent(arguments)
+        case .setStatus:
+            return await handleSetStatus(arguments)
         case .createWorktree:
             return await handleCreateWorktree(arguments)
         case .displayMarkdown:
@@ -431,6 +444,22 @@ actor MCPToolHandler {
 
         let result = await mcpService.closeAgent(callerAgentId: agentId, targetIdentifier: target)
         return successResult(result)
+    }
+
+    private func handleSetStatus(_ arguments: [String: Any]) async -> ToolCallResult {
+        guard let agentIdString = arguments["agentId"] as? String else {
+            return errorResult("Missing required parameter: agentId")
+        }
+        guard let status = arguments["status"] as? String else {
+            return errorResult("Missing required parameter: status")
+        }
+
+        guard let agent = await mcpService.findAgent(byNameOrId: agentIdString) else {
+            return await agentNotFoundError(agentIdString)
+        }
+
+        await mcpService.setAgentStatus(for: agent.id, status: status)
+        return successResult("Status updated")
     }
 
     private func handleCreateWorktree(_ arguments: [String: Any]) async -> ToolCallResult {

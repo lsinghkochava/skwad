@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import AppKit
 
-enum AgentStatus: String, Codable {
+enum AgentState: String, Codable {
     case idle = "Idle"
     case running = "Working"
     case input = "Awaiting input"
@@ -36,10 +36,16 @@ struct Agent: Identifiable, Codable, Hashable {
     var personaId: UUID?  // Optional persona to apply to system prompt
 
     // Runtime state (not persisted)
-    var status: AgentStatus = .idle
+
+    /// Internal state machine state (idle/running/input/error), driven by terminal activity and hooks
+    var state: AgentState = .idle
+    /// Human-readable status text explicitly set by the agent via the `set-status` MCP tool (e.g. "Implementing auth module").
+    /// Distinct from `state` (automatic state machine) and `terminalTitle` (terminal escape sequence).
+    var statusText: String = ""
     var isRegistered: Bool = false  // Set true when agent calls register-agent with MCP
     var isPendingStart: Bool = false  // Shell agents waiting in the startup queue
-    var terminalTitle: String = ""  // Current terminal title
+    /// Raw terminal title from escape sequences. Use `displayTitle` for display (currently an alias).
+    var terminalTitle: String = ""
     var restartToken: UUID = UUID()  // Changes on restart to force terminal recreation
     var gitStats: GitLineStats? = nil
     var sessionId: String? = nil  // Set during register-agent, used by hooks for activity detection
@@ -51,6 +57,7 @@ struct Agent: Identifiable, Codable, Hashable {
     var mermaidSource: String? = nil  // Mermaid diagram source text (set by MCP tool)
     var mermaidTitle: String? = nil  // Optional title for the mermaid diagram
     var metadata: [String: String] = [:]  // Hook-populated metadata (transcript_path, cwd, model, etc.)
+    var lastStatusChange: Date = Date()  // When status last changed (runtime only, for dashboard sorting)
 
     /// Actual working directory: hook-reported cwd if it differs from folder (e.g. worktree), otherwise folder.
     /// Ignores cwd when it's a subdirectory of folder (e.g. agent cd'd into a subfolder).

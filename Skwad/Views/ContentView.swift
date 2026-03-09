@@ -40,318 +40,38 @@ struct ContentView: View {
     return agentManager.agents.first { $0.id == id }
   }
 
+  private var isAnyDashboardVisible: Bool {
+    agentManager.showGlobalDashboard || agentManager.showDashboard
+  }
+
   private var canShowGitPanel: Bool {
     guard let agent = activeAgent else { return false }
     return GitWorktreeManager.shared.isGitRepo(agent.folder)
   }
 
+  private var isTerminalAreaCollapsed: Bool {
+    artifactExpanded || isAnyDashboardVisible
+  }
+
+  private var shouldShowEmptyState: Bool {
+    !isAnyDashboardVisible && (agentManager.workspaces.isEmpty || agentManager.currentWorkspaceAgents.isEmpty)
+  }
+
+  private var shouldShowLayoutToggle: Bool {
+    !isAnyDashboardVisible && agentManager.currentWorkspaceAgents.count >= 2
+  }
+
+  private var shouldShowSplitModeOverlays: Bool {
+    !isAnyDashboardVisible && agentManager.layoutMode != .single
+  }
+
   var body: some View {
     HStack(spacing: 0) {
-      // Workspace bar (always visible when workspaces exist)
-      if !agentManager.workspaces.isEmpty {
-        WorkspaceBarView(sidebarVisible: $sidebarVisible)
-          .transition(.move(edge: .leading).combined(with: .opacity))
-      }
-
-      if !agentManager.currentWorkspaceAgents.isEmpty && sidebarVisible {
-        SidebarView(sidebarVisible: $sidebarVisible, forkPrefill: $forkPrefill, isCompact: Self.isSidebarCompact(width: sidebarWidth))
-          .frame(width: sidebarWidth)
-          .transition(.move(edge: .leading).combined(with: .opacity))
-
-        // Resize handle
-        Rectangle()
-          .fill(Color.clear)
-          .frame(width: 6)
-          .contentShape(Rectangle())
-          .onHover { hovering in
-            if hovering {
-              NSCursor.resizeLeftRight.push()
-            } else {
-              NSCursor.pop()
-            }
-          }
-          .gesture(
-            DragGesture()
-              .onChanged { value in
-                let newWidth = sidebarWidth + value.translation.width
-                sidebarWidth = min(max(newWidth, Self.minSidebarWidth), Self.maxSidebarWidth)
-              }
-          )
-      }
-
-      GeometryReader { geo in
-        ZStack(alignment: .topLeading) {
-          // Keep all terminals alive, show/hide via opacity (never recreated)
-          ForEach(agentManager.agents) { agent in
-
-            let visible = agentManager.activeAgentIds.contains(agent.id)
-            let rect = visible ? paneRect(for: agent.id, in: geo.size) : (lastPaneRects[agent.id] ?? CGRect(origin: .zero, size: geo.size))
-            let paneIdx = agentManager.paneIndex(for: agent.id) ?? 0
-
-            AgentTerminalView(
-              agent: agent,
-              paneIndex: paneIdx,
-              suppressFocus: showFileFinder,
-              sidebarVisible: $sidebarVisible,
-              forkPrefill: $forkPrefill,
-              onGitStatsTap: {
-                if GitWorktreeManager.shared.isGitRepo(agent.folder) {
-                  // Focus this agent's pane first so git panel opens for it
-                  if let pane = agentManager.paneIndex(for: agent.id) {
-                    agentManager.focusPane(pane)
-                  }
-                  withAnimation(.easeInOut(duration: 0.2)) {
-                    showGitPanel.toggle()
-                  }
-                }
-              },
-              onPaneTap: {
-                if let pane = agentManager.paneIndex(for: agent.id) {
-                  agentManager.focusPane(pane)
-                }
-              }
-            )
-              .id("\(agent.id)-\(agent.restartToken)")
-              .frame(width: rect.width, height: rect.height)
-              .offset(x: rect.minX, y: rect.minY)
-              .opacity(visible ? 1 : 0)
-              .allowsHitTesting(visible)
-              .onAppear {
-                // Seed cache so first visibility doesn't cause a resize
-                if lastPaneRects[agent.id] == nil {
-                  lastPaneRects[agent.id] = CGRect(origin: .zero, size: geo.size)
-                }
-              }
-              .onChange(of: visible) { _, isVisible in
-                if isVisible {
-                  lastPaneRects[agent.id] = paneRect(for: agent.id, in: geo.size)
-                }
-              }
-          }
-
-          // Empty state - no workspaces or empty workspace
-          if agentManager.workspaces.isEmpty || agentManager.currentWorkspaceAgents.isEmpty {
-            VStack(spacing: 16) {
-
-              Image(nsImage: NSApplication.shared.applicationIconImage)
-                .resizable()
-                .frame(width: 128, height: 128)
-                .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
-
-              VStack(spacing: 0) {
-                Text("Welcome to Skwad!")
-                  .font(.system(size: 36, weight: .semibold))
-                  .foregroundColor(.primary)
-
-                Text(agentManager.workspaces.isEmpty
-                    ? "Start by creating your first workspace"
-                    : "Add an agent to your workspace")
-                  .font(.title)
-                  .foregroundColor(.secondary)
-              }
-
-              SplitButton("New Agent") {
-                showNewAgentSheet = true
-              } popover: {
-                BenchDropdownView(
-                  onNewAgent: {
-                    showNewAgentSheet = true
-                  },
-                  onDeploy: { benchAgent in
-                    agentManager.deployBenchAgent(benchAgent)
-                  }
-                )
-                .environment(agentManager)
-              }
-              .frame(width: 240)
-              .padding(.vertical, 32)
-
-              VStack(spacing: 12) {
-
-                Text("Install Skwad MCP Server to enable agent‑to‑agent communication")
-                  .font(.title2)
-                  .foregroundColor(.secondary)
-
-                MCPCommandView(
-                  serverURL: settings.mcpServerURL,
-                  fontSize: .title3,
-                  backgroundColor: Color.black.opacity(0.08),
-                  iconSize: 20
-                )
-                .frame(maxWidth: 820)
-              }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(settings.effectiveBackgroundColor)
-          }
-
-          // Layout toggle button — positioned in top-right corner
-          if agentManager.currentWorkspaceAgents.count >= 2 {
-            HStack {
-              Spacer()
-              layoutToggleButton
-            }
-            .padding(.top, sidebarVisible ? 76 : 36)
-            .padding(.trailing, 12)
-          }
-
-          // Git toggle button — positioned in bottom-right of active pane
-          if canShowGitPanel {
-            let activeRect = computePaneRect(agentManager.focusedPaneIndex, in: geo.size)
-            VStack {
-              Spacer()
-              HStack {
-                Spacer()
-                gitToggleButton
-                  .padding(16)
-              }
-            }
-            .frame(width: activeRect.width, height: activeRect.height)
-            .offset(x: activeRect.minX, y: activeRect.minY)
-          }
-
-          // Split mode overlays
-          if agentManager.layoutMode != .single {
-            // Dim the unfocused panes
-            ForEach(0..<agentManager.layoutMode.paneCount, id: \.self) { pane in
-              if pane != agentManager.focusedPaneIndex {
-                let rect = computePaneRect(pane, in: geo.size)
-                Rectangle()
-                  .fill(Color.black.opacity(Theme.unfocusedOverlayOpacity))
-                  .frame(width: rect.width, height: rect.height)
-                  .offset(x: rect.minX, y: rect.minY)
-                  .allowsHitTesting(false)
-              }
-            }
-
-            if agentManager.layoutMode == .splitVertical || agentManager.layoutMode == .splitHorizontal {
-              // Use NSView-based divider to sit above terminal NSViews
-              let isVertical = agentManager.layoutMode == .splitVertical
-              let pos = isVertical ? geo.size.width * agentManager.splitRatio : geo.size.height * agentManager.splitRatio
-              let dividerWidth: CGFloat = 12
-              SplitDividerView(
-                isVertical: isVertical,
-                onDrag: { delta in
-                  if dragStartRatio == nil {
-                    dragStartRatio = agentManager.splitRatio
-                  }
-                  let totalSize = isVertical ? geo.size.width : geo.size.height
-                  let startPos = totalSize * dragStartRatio!
-                  let newRatio = (startPos + delta) / totalSize
-                  agentManager.splitRatio = max(0.25, min(0.75, newRatio))
-                },
-                onDragEnd: {
-                  dragStartRatio = nil
-                  for id in agentManager.activeAgentIds {
-                    agentManager.notifyTerminalResize(for: id)
-                  }
-                }
-              )
-              .frame(
-                width: isVertical ? dividerWidth : geo.size.width,
-                height: isVertical ? geo.size.height : dividerWidth
-              )
-              .offset(
-                x: isVertical ? pos - dividerWidth / 2 : 0,
-                y: isVertical ? 0 : pos - dividerWidth / 2
-              )
-            } else if agentManager.layoutMode == .threePane || agentManager.layoutMode == .gridFourPane {
-              // Vertical + horizontal dividers
-              let dividerWidth: CGFloat = 12
-              let vertPos = geo.size.width * agentManager.splitRatio
-              let horizPos = geo.size.height * agentManager.splitRatioSecondary
-              let isThreePane = agentManager.layoutMode == .threePane
-
-              // Vertical divider (controls primary ratio) - full height
-              SplitDividerView(
-                isVertical: true,
-                onDrag: { delta in
-                  if dragStartRatio == nil {
-                    dragStartRatio = agentManager.splitRatio
-                  }
-                  let startPos = geo.size.width * dragStartRatio!
-                  let newRatio = (startPos + delta) / geo.size.width
-                  agentManager.splitRatio = max(0.25, min(0.75, newRatio))
-                },
-                onDragEnd: {
-                  dragStartRatio = nil
-                  for id in agentManager.activeAgentIds {
-                    agentManager.notifyTerminalResize(for: id)
-                  }
-                }
-              )
-              .frame(width: dividerWidth, height: geo.size.height)
-              .offset(x: vertPos - dividerWidth / 2)
-
-              // Horizontal divider (controls secondary ratio)
-              // In threePane: only spans the right half
-              // In gridFourPane: spans full width
-              SplitDividerView(
-                isVertical: false,
-                onDrag: { delta in
-                  if dragStartRatioSecondary == nil {
-                    dragStartRatioSecondary = agentManager.splitRatioSecondary
-                  }
-                  let startPos = geo.size.height * dragStartRatioSecondary!
-                  let newRatio = (startPos + delta) / geo.size.height
-                  agentManager.splitRatioSecondary = max(0.25, min(0.75, newRatio))
-                },
-                onDragEnd: {
-                  dragStartRatioSecondary = nil
-                  for id in agentManager.activeAgentIds {
-                    agentManager.notifyTerminalResize(for: id)
-                  }
-                }
-              )
-              .frame(width: isThreePane ? geo.size.width - vertPos : geo.size.width, height: dividerWidth)
-              .offset(x: isThreePane ? vertPos : 0, y: horizPos - dividerWidth / 2)
-            }
-          }
-        }
-      }
-      .opacity(artifactExpanded ? 0 : 1)
-      .frame(width: artifactExpanded ? 0 : nil)
-
-      // Git panel (sliding from right)
-      if showGitPanel, let agent = activeAgent {
-        GitPanelView(folder: agent.folder) {
-          withAnimation(.easeInOut(duration: 0.2)) {
-            showGitPanel = false
-          }
-        }
-        .transition(.move(edge: .trailing))
-      }
-
-      // Artifact panel (markdown + mermaid, sliding from right)
-      if let agent = activeAgent, agent.markdownFilePath != nil || agent.mermaidSource != nil {
-        ArtifactPanelView(
-          agent: agent,
-          isExpanded: $artifactExpanded,
-          onCloseMarkdown: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-              agentManager.closeMarkdownPanel(for: agent.id)
-              if agent.mermaidSource == nil {
-                artifactExpanded = false
-              }
-            }
-          },
-          onCloseMermaid: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-              agentManager.closeMermaidPanel(for: agent.id)
-              if agent.markdownFilePath == nil {
-                artifactExpanded = false
-              }
-            }
-          },
-          onMarkdownComment: { text in
-            agentManager.sendText(text, for: agent.id)
-          },
-          onMarkdownSubmitReview: {
-            agentManager.sendReturn(for: agent.id)
-          }
-        )
-        .transition(.move(edge: .trailing))
-      }
+      workspaceBar
+      dashboardOrSidebar
+      terminalArea
+      gitPanel
+      artifactPanel
     }
     .background(settings.sidebarBackgroundColor)
     .frame(minWidth: 900, minHeight: 600)
@@ -481,6 +201,369 @@ struct ContentView: View {
       if activeAgent != nil {
         showFileFinder.toggle()
       }
+    }
+  }
+
+  @ViewBuilder
+  private var workspaceBar: some View {
+    if !agentManager.workspaces.isEmpty {
+      WorkspaceBarView(sidebarVisible: $sidebarVisible)
+        .transition(.move(edge: .leading).combined(with: .opacity))
+    }
+  }
+
+  private var terminalArea: some View {
+    GeometryReader { geo in
+      terminalStage(in: geo)
+    }
+    .opacity(isTerminalAreaCollapsed ? 0 : 1)
+    .frame(width: isTerminalAreaCollapsed ? 0 : nil)
+    .allowsHitTesting(!isTerminalAreaCollapsed)
+    .clipped()
+  }
+
+  @ViewBuilder
+  private func terminalStage(in geo: GeometryProxy) -> some View {
+    ZStack(alignment: .topLeading) {
+      terminalViews(in: geo)
+
+      if shouldShowEmptyState {
+        emptyStateView
+      }
+
+      if shouldShowLayoutToggle {
+        layoutToggleOverlay
+      }
+
+      if !isAnyDashboardVisible && canShowGitPanel {
+        gitToggleOverlay(in: geo)
+      }
+
+      if shouldShowSplitModeOverlays {
+        splitModeOverlays(in: geo)
+      }
+    }
+  }
+
+  @ViewBuilder
+  private func terminalViews(in geo: GeometryProxy) -> some View {
+    ForEach(agentManager.agents) { agent in
+      terminalView(for: agent, in: geo)
+    }
+  }
+
+  private func terminalView(for agent: Agent, in geo: GeometryProxy) -> some View {
+    let visible = isTerminalVisible(agent)
+    let rect = terminalRect(for: agent, in: geo.size, visible: visible)
+    let paneIdx = agentManager.paneIndex(for: agent.id) ?? 0
+
+    return AgentTerminalView(
+      agent: agent,
+      paneIndex: paneIdx,
+      suppressFocus: showFileFinder,
+      sidebarVisible: $sidebarVisible,
+      forkPrefill: $forkPrefill,
+      onGitStatsTap: {
+        if GitWorktreeManager.shared.isGitRepo(agent.folder) {
+          if let pane = agentManager.paneIndex(for: agent.id) {
+            agentManager.focusPane(pane)
+          }
+          withAnimation(.easeInOut(duration: 0.2)) {
+            showGitPanel.toggle()
+          }
+        }
+      },
+      onPaneTap: {
+        if let pane = agentManager.paneIndex(for: agent.id) {
+          agentManager.focusPane(pane)
+        }
+      }
+    )
+    .id("\(agent.id)-\(agent.restartToken)")
+    .frame(width: rect.width, height: rect.height)
+    .offset(x: rect.minX, y: rect.minY)
+    .opacity(visible ? 1 : 0)
+    .allowsHitTesting(visible)
+    .onAppear {
+      if lastPaneRects[agent.id] == nil {
+        lastPaneRects[agent.id] = CGRect(origin: .zero, size: geo.size)
+      }
+    }
+    .onChange(of: visible) { _, isVisible in
+      if isVisible {
+        lastPaneRects[agent.id] = paneRect(for: agent.id, in: geo.size)
+      }
+    }
+  }
+
+  private func isTerminalVisible(_ agent: Agent) -> Bool {
+    !isAnyDashboardVisible && agentManager.activeAgentIds.contains(agent.id)
+  }
+
+  private func terminalRect(for agent: Agent, in size: CGSize, visible: Bool) -> CGRect {
+    if visible {
+      return paneRect(for: agent.id, in: size)
+    }
+    if isTerminalAreaCollapsed {
+      return .zero
+    }
+    return lastPaneRects[agent.id] ?? CGRect(origin: .zero, size: size)
+  }
+
+  private var emptyStateView: some View {
+    VStack(spacing: 16) {
+      Image(nsImage: NSApplication.shared.applicationIconImage)
+        .resizable()
+        .frame(width: 128, height: 128)
+        .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+
+      VStack(spacing: 0) {
+        Text("Welcome to Skwad!")
+          .font(.system(size: 36, weight: .semibold))
+          .foregroundColor(.primary)
+
+        Text(agentManager.workspaces.isEmpty
+             ? "Start by creating your first workspace"
+             : "Add an agent to your workspace")
+          .font(.title)
+          .foregroundColor(.secondary)
+      }
+
+      SplitButton("New Agent") {
+        showNewAgentSheet = true
+      } popover: {
+        BenchDropdownView(
+          onNewAgent: {
+            showNewAgentSheet = true
+          },
+          onDeploy: { benchAgent in
+            agentManager.deployBenchAgent(benchAgent)
+          }
+        )
+        .environment(agentManager)
+      }
+      .frame(width: 240)
+      .padding(.vertical, 32)
+
+      VStack(spacing: 12) {
+        Text("Install Skwad MCP Server to enable agent‑to‑agent communication")
+          .font(.title2)
+          .foregroundColor(.secondary)
+
+        MCPCommandView(
+          serverURL: settings.mcpServerURL,
+          fontSize: .title3,
+          backgroundColor: Color.black.opacity(0.08),
+          iconSize: 20
+        )
+        .frame(maxWidth: 820)
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(settings.effectiveBackgroundColor)
+  }
+
+  private var layoutToggleOverlay: some View {
+    HStack {
+      Spacer()
+      layoutToggleButton
+    }
+    .padding(.top, sidebarVisible ? 76 : 36)
+    .padding(.trailing, 12)
+  }
+
+  private func gitToggleOverlay(in geo: GeometryProxy) -> some View {
+    let activeRect = computePaneRect(agentManager.focusedPaneIndex, in: geo.size)
+    return VStack {
+      Spacer()
+      HStack {
+        Spacer()
+        gitToggleButton
+          .padding(16)
+      }
+    }
+    .frame(width: activeRect.width, height: activeRect.height)
+    .offset(x: activeRect.minX, y: activeRect.minY)
+  }
+
+  @ViewBuilder
+  private func splitModeOverlays(in geo: GeometryProxy) -> some View {
+    ForEach(0..<agentManager.layoutMode.paneCount, id: \.self) { pane in
+      if pane != agentManager.focusedPaneIndex {
+        let rect = computePaneRect(pane, in: geo.size)
+        Rectangle()
+          .fill(Color.black.opacity(Theme.unfocusedOverlayOpacity))
+          .frame(width: rect.width, height: rect.height)
+          .offset(x: rect.minX, y: rect.minY)
+          .allowsHitTesting(false)
+      }
+    }
+
+    if agentManager.layoutMode == .splitVertical || agentManager.layoutMode == .splitHorizontal {
+      let isVertical = agentManager.layoutMode == .splitVertical
+      let pos = isVertical ? geo.size.width * agentManager.splitRatio : geo.size.height * agentManager.splitRatio
+      let dividerWidth: CGFloat = 12
+      SplitDividerView(
+        isVertical: isVertical,
+        onDrag: { delta in
+          if dragStartRatio == nil {
+            dragStartRatio = agentManager.splitRatio
+          }
+          let totalSize = isVertical ? geo.size.width : geo.size.height
+          let startPos = totalSize * dragStartRatio!
+          let newRatio = (startPos + delta) / totalSize
+          agentManager.splitRatio = max(0.25, min(0.75, newRatio))
+        },
+        onDragEnd: {
+          dragStartRatio = nil
+          for id in agentManager.activeAgentIds {
+            agentManager.notifyTerminalResize(for: id)
+          }
+        }
+      )
+      .frame(
+        width: isVertical ? dividerWidth : geo.size.width,
+        height: isVertical ? geo.size.height : dividerWidth
+      )
+      .offset(
+        x: isVertical ? pos - dividerWidth / 2 : 0,
+        y: isVertical ? 0 : pos - dividerWidth / 2
+      )
+    } else if agentManager.layoutMode == .threePane || agentManager.layoutMode == .gridFourPane {
+      let dividerWidth: CGFloat = 12
+      let vertPos = geo.size.width * agentManager.splitRatio
+      let horizPos = geo.size.height * agentManager.splitRatioSecondary
+      let isThreePane = agentManager.layoutMode == .threePane
+
+      SplitDividerView(
+        isVertical: true,
+        onDrag: { delta in
+          if dragStartRatio == nil {
+            dragStartRatio = agentManager.splitRatio
+          }
+          let startPos = geo.size.width * dragStartRatio!
+          let newRatio = (startPos + delta) / geo.size.width
+          agentManager.splitRatio = max(0.25, min(0.75, newRatio))
+        },
+        onDragEnd: {
+          dragStartRatio = nil
+          for id in agentManager.activeAgentIds {
+            agentManager.notifyTerminalResize(for: id)
+          }
+        }
+      )
+      .frame(width: dividerWidth, height: geo.size.height)
+      .offset(x: vertPos - dividerWidth / 2)
+
+      SplitDividerView(
+        isVertical: false,
+        onDrag: { delta in
+          if dragStartRatioSecondary == nil {
+            dragStartRatioSecondary = agentManager.splitRatioSecondary
+          }
+          let startPos = geo.size.height * dragStartRatioSecondary!
+          let newRatio = (startPos + delta) / geo.size.height
+          agentManager.splitRatioSecondary = max(0.25, min(0.75, newRatio))
+        },
+        onDragEnd: {
+          dragStartRatioSecondary = nil
+          for id in agentManager.activeAgentIds {
+            agentManager.notifyTerminalResize(for: id)
+          }
+        }
+      )
+      .frame(width: isThreePane ? geo.size.width - vertPos : geo.size.width, height: dividerWidth)
+      .offset(x: isThreePane ? vertPos : 0, y: horizPos - dividerWidth / 2)
+    }
+  }
+
+  @ViewBuilder
+  private var gitPanel: some View {
+    if showGitPanel, let agent = activeAgent {
+      GitPanelView(folder: agent.folder) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+          showGitPanel = false
+        }
+      }
+      .transition(.move(edge: .trailing))
+    }
+  }
+
+  @ViewBuilder
+  private var artifactPanel: some View {
+    if let agent = activeAgent, agent.markdownFilePath != nil || agent.mermaidSource != nil {
+      ArtifactPanelView(
+        agent: agent,
+        isExpanded: $artifactExpanded,
+        onCloseMarkdown: {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            agentManager.closeMarkdownPanel(for: agent.id)
+            if agent.mermaidSource == nil {
+              artifactExpanded = false
+            }
+          }
+        },
+        onCloseMermaid: {
+          withAnimation(.easeInOut(duration: 0.2)) {
+            agentManager.closeMermaidPanel(for: agent.id)
+            if agent.markdownFilePath == nil {
+              artifactExpanded = false
+            }
+          }
+        },
+        onMarkdownComment: { text in
+          agentManager.sendText(text, for: agent.id)
+        },
+        onMarkdownSubmitReview: {
+          agentManager.sendReturn(for: agent.id)
+        }
+      )
+      .transition(.move(edge: .trailing))
+    }
+  }
+
+  // MARK: - Dashboard / Sidebar
+
+  @ViewBuilder
+  private var dashboardOrSidebar: some View {
+    // Global dashboard: takes over sidebar + content area
+    if agentManager.showGlobalDashboard {
+      GlobalDashboardView(forkPrefill: $forkPrefill)
+        .transition(.opacity)
+        .zIndex(1)
+    }
+
+    // Workspace dashboard: takes over sidebar + content area
+    if !agentManager.showGlobalDashboard && agentManager.showDashboard {
+      WorkspaceDashboardView(forkPrefill: $forkPrefill)
+        .transition(.opacity)
+        .zIndex(1)
+    }
+
+    if !isAnyDashboardVisible && !agentManager.currentWorkspaceAgents.isEmpty && sidebarVisible {
+      SidebarView(sidebarVisible: $sidebarVisible, forkPrefill: $forkPrefill, isCompact: Self.isSidebarCompact(width: sidebarWidth))
+        .frame(width: sidebarWidth)
+        .transition(.move(edge: .leading).combined(with: .opacity))
+
+      // Resize handle
+      Rectangle()
+        .fill(Color.clear)
+        .frame(width: 6)
+        .contentShape(Rectangle())
+        .onHover { hovering in
+          if hovering {
+            NSCursor.resizeLeftRight.push()
+          } else {
+            NSCursor.pop()
+          }
+        }
+        .gesture(
+          DragGesture()
+            .onChanged { value in
+              let newWidth = sidebarWidth + value.translation.width
+              sidebarWidth = min(max(newWidth, Self.minSidebarWidth), Self.maxSidebarWidth)
+            }
+        )
     }
   }
 
@@ -902,12 +985,12 @@ private struct SplitPanePreview: View {
 
 @MainActor private func previewSplitManager() -> AgentManager {
   var a1 = Agent(name: "skwad", avatar: "🐱", folder: "/Users/nbonamy/src/skwad")
-  a1.status = .running
+  a1.state = .running
   a1.terminalTitle = "Editing ContentView.swift"
   a1.gitStats = .init(insertions: 42, deletions: 7, files: 3)
 
   var a2 = Agent(name: "witsy", avatar: "🤖", folder: "/Users/nbonamy/src/witsy")
-  a2.status = .idle
+  a2.state = .idle
   a2.gitStats = .init(insertions: 0, deletions: 0, files: 0)
 
   let m = AgentManager()

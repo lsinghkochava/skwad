@@ -845,7 +845,7 @@ struct ScrollWheelView<Content: View>: NSViewRepresentable {
 
 #Preview("Edit Agent") {
     var agent = Agent(name: "skwad", avatar: "🐱", folder: "/Users/nbonamy/src/skwad")
-    agent.status = .running
+    agent.state = .running
     return AgentSheet(editing: agent)
         .environment(AgentManager())
 }

@@ -26,8 +26,13 @@ struct SkwadApp: App {
 
     private var settings: AppSettings { AppSettings.shared }
 
+    private var isAnyDashboardVisible: Bool {
+        agentManager.showGlobalDashboard || agentManager.showDashboard
+    }
+
     private var activeAgentForMenu: Agent? {
-        guard let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }),
+        guard !isAnyDashboardVisible,
+              let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }),
               !agent.isCompanion else { return nil }
         return agent
     }
@@ -161,7 +166,7 @@ struct SkwadApp: App {
                     createCompanionShell()
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
-                .disabled(agentManager.activeAgentId == nil)
+                .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
 
                 Divider()
 
@@ -177,7 +182,7 @@ struct SkwadApp: App {
                         openActiveAgentInDefaultApp()
                     }
                     .keyboardShortcut("o", modifiers: [.command, .shift])
-                    .disabled(agentManager.activeAgentId == nil)
+                    .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
                 }
 
                 Divider()
@@ -186,7 +191,7 @@ struct SkwadApp: App {
                     closeCurrentAgent()
                 }
                 .keyboardShortcut("w", modifiers: .command)
-                .disabled(agentManager.activeAgentId == nil)
+                .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
 
                 Button("Close Workspace") {
                     closeCurrentWorkspace()
@@ -211,7 +216,7 @@ struct SkwadApp: App {
                     toggleFileFinder.toggle()
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
-                .disabled(agentManager.activeAgentId == nil)
+                .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
 
                 Divider()
 
@@ -221,7 +226,7 @@ struct SkwadApp: App {
                     }
                 }
                 .keyboardShortcut("k", modifiers: .command)
-                .disabled(agentManager.activeAgentId == nil)
+                .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
 
                 Button("Restart Current Agent") {
                     if let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }) {
@@ -229,7 +234,7 @@ struct SkwadApp: App {
                     }
                 }
                 .keyboardShortcut("r", modifiers: .command)
-                .disabled(agentManager.activeAgentId == nil)
+                .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
 
                 Divider()
 
@@ -256,21 +261,38 @@ struct SkwadApp: App {
                     toggleGitPanel.toggle()
                 }
                 .keyboardShortcut("/", modifiers: .command)
+                .disabled(isAnyDashboardVisible)
 
                 Button("Toggle Sidebar") {
                     toggleSidebar.toggle()
                 }
                 .keyboardShortcut("b", modifiers: [.command, .option])
+                .disabled(isAnyDashboardVisible)
+
+                Button("Toggle Dashboard") {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        if agentManager.showGlobalDashboard {
+                            agentManager.showGlobalDashboard = false
+                        } else if agentManager.showDashboard {
+                            agentManager.showDashboard = false
+                        } else {
+                            agentManager.showDashboard = true
+                        }
+                    }
+                }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
 
                 Button("Next Agent") {
                     agentManager.selectNextAgent()
                 }
                 .keyboardShortcut("]", modifiers: .command)
+                .disabled(isAnyDashboardVisible)
 
                 Button("Previous Agent") {
                     agentManager.selectPreviousAgent()
                 }
                 .keyboardShortcut("[", modifiers: .command)
+                .disabled(isAnyDashboardVisible)
 
                 // Cmd+1-9 to switch workspaces (changes rarely so safe to use dynamic ForEach)
                 if !agentManager.workspaces.isEmpty {

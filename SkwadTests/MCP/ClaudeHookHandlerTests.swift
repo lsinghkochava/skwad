@@ -218,7 +218,7 @@ final class ClaudeHookHandlerTests: XCTestCase {
         XCTAssertEqual(status, .running)
 
         let updated = await provider.getAgent(id: agent.id)
-        XCTAssertEqual(updated?.status, .running)
+        XCTAssertEqual(updated?.state, .running)
     }
 
     func testActivityStatusIdle() async {
@@ -232,7 +232,7 @@ final class ClaudeHookHandlerTests: XCTestCase {
         XCTAssertEqual(status, .idle)
 
         let updated = await provider.getAgent(id: agent.id)
-        XCTAssertEqual(updated?.status, .idle)
+        XCTAssertEqual(updated?.state, .idle)
     }
 
     func testActivityStatusInvalid() async {

@@ -48,11 +48,11 @@ struct ClaudeHookHandler {
 
     /// Handle activity status updates (UserPromptSubmit / Stop / PreToolUse hooks).
     /// Returns the parsed AgentStatus or nil on error.
-    func handleActivityStatus(agentId: UUID, json: [String: Any]) async -> AgentStatus? {
+    func handleActivityStatus(agentId: UUID, json: [String: Any]) async -> AgentState? {
         guard let statusString = json["status"] as? String,
-              let agentStatus = (statusString == "running" ? AgentStatus.running :
-                                 statusString == "idle" ? AgentStatus.idle :
-                                 statusString == "input" ? AgentStatus.input : nil) else {
+              let agentStatus = (statusString == "running" ? AgentState.running :
+                                 statusString == "idle" ? AgentState.idle :
+                                 statusString == "input" ? AgentState.input : nil) else {
             return nil
         }
 

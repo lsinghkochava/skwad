@@ -42,7 +42,7 @@ final class CodexHookHandlerTests: XCTestCase {
         XCTAssertEqual(status, .idle)
 
         let updated = await provider.getAgent(id: agent.id)
-        XCTAssertEqual(updated?.status, .idle)
+        XCTAssertEqual(updated?.state, .idle)
     }
 
     func testUnknownEventTypeReturnsNil() async {

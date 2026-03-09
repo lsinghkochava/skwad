@@ -79,40 +79,42 @@ Views/Dashboard/
 ## Implementation Phases
 
 ### Phase 1: Data Model + Shared Components
-- [ ] Add `lastStatusChange: Date` to Agent model (runtime only)
-- [ ] Update AgentManager to set `lastStatusChange` on status changes
-- [ ] Create `QuickPromptField` view
-- [ ] Create `StatusSummaryView` view
-- [ ] Create `AgentCardView` view
-- [ ] Add SwiftUI previews for all components
+- [x] Add `lastStatusChange: Date` to Agent model (runtime only)
+- [x] Update AgentManager to set `lastStatusChange` on status changes
+- [x] Create `QuickPromptField` view
+- [x] Create `StatusSummaryView` view
+- [x] Create `AgentCardView` view
+- [x] Add SwiftUI previews for all components
 - **Commit**: `feat: add dashboard shared components`
 
 ### Phase 2: Workspace Dashboard
-- [ ] Add `showDashboard: Bool` to Workspace model (persisted)
-- [ ] Create `WorkspaceDashboardView` with card grid layout
-- [ ] Add dashboard toggle to SidebarView header
-- [ ] Wire into ContentView — dashboard replaces sidebar+content when active
-- [ ] Add "back to workspace" navigation in dashboard header
-- [ ] Add previews
+- [x] Add `showDashboard: Bool` to Workspace model (persisted)
+- [x] Create `WorkspaceDashboardView` with card grid layout
+- [x] Add dashboard toggle to SidebarView header
+- [x] Wire into ContentView — dashboard replaces sidebar+content when active
+- [x] Add "back to workspace" navigation in dashboard header
+- [x] Add previews
 - **Commit**: `feat: workspace dashboard view`
 
 ### Phase 3: Global Dashboard
-- [ ] Add global dashboard icon to WorkspaceBarView (above workspace circles)
-- [ ] Add `showGlobalDashboard: Bool` state to AgentManager
-- [ ] Create `GlobalDashboardView` with workspace sections
-- [ ] Wire into ContentView — global dashboard takes over everything
-- [ ] Click-to-navigate: switch workspace + select agent
-- [ ] Add previews
+- [x] Add global dashboard icon to WorkspaceBarView (above workspace circles)
+- [x] Add `showGlobalDashboard: Bool` state to AgentManager
+- [x] Create `GlobalDashboardView` with workspace sections
+- [x] Wire into ContentView — global dashboard takes over everything
+- [x] Click-to-navigate: switch workspace + select agent
+- [x] Add previews
 - **Commit**: `feat: global dashboard view`
 
 ### Phase 4: Polish & Testing
-- [ ] Card hover effects and transitions
-- [ ] Smooth dashboard open/close animations
-- [ ] Keyboard shortcut for dashboard toggle
-- [ ] Tests for StatusSummaryView logic
-- [ ] Tests for QuickPromptField behavior
-- [ ] Final preview polish
+- [x] Card hover effects and transitions (done in Phase 1 — hover scale/shadow on AgentCardView)
+- [x] Smooth dashboard open/close animations (done — .easeInOut transitions)
+- [x] Keyboard shortcut for dashboard toggle (Cmd+Shift+D)
+- [x] Tests for dashboard state (lastStatusChange, showDashboard, showGlobalDashboard, migration)
+- [x] Final preview polish
 - **Commit**: `chore: dashboard polish and tests`
 
 ## Key Learnings
-(to be filled after implementation)
+- Extracting the dashboard/sidebar section into a `@ViewBuilder` computed property was necessary to help Swift's type checker with ContentView's body complexity
+- Using `Bool?` for `showDashboard` on Workspace handles Codable migration gracefully (nil decodes to false via `isDashboardVisible`)
+- The `isAnyDashboardVisible` helper on ContentView avoids repeating the compound condition everywhere
+- Shared `AgentCardView` + `StatusSummaryView` + `QuickPromptField` components make the global and workspace dashboards nearly identical in code structure

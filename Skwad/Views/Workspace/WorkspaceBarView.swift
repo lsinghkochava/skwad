@@ -32,14 +32,37 @@ struct WorkspaceBarView: View {
             LazyVStack(spacing: 8) {
                 Spacer(minLength: 32)
 
+                // Global dashboard button
+                Button {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        agentManager.showGlobalDashboard.toggle()
+                        if agentManager.showGlobalDashboard {
+                            agentManager.showDashboard = false
+                        }
+                    }
+                } label: {
+                    Image(systemName: "safari")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(agentManager.showGlobalDashboard ? .white : Theme.secondaryText)
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle()
+                                .fill(agentManager.showGlobalDashboard ? Color.accentColor : WorkspaceAvatarView.unselectedColor)
+                        )
+                }
+                .buttonStyle(.plain)
+                .focusable(false)
+                .help("Global Dashboard")
+
                 // Workspace list
                 ForEach(agentManager.workspaces) { workspace in
                     WorkspaceAvatarView(
                         workspace: workspace,
-                        isSelected: workspace.id == agentManager.currentWorkspaceId,
+                        isSelected: !agentManager.showGlobalDashboard && workspace.id == agentManager.currentWorkspaceId,
                         activityStatus: agentManager.workspaceStatus(workspace)
                     )
                     .onTapGesture {
+                        agentManager.showGlobalDashboard = false
                         agentManager.switchToWorkspace(workspace.id)
                     }
                     .contextMenu {
@@ -143,15 +166,15 @@ struct WorkspaceBarView: View {
 struct WorkspaceAvatarView: View {
     let workspace: Workspace
     let isSelected: Bool
-    let activityStatus: AgentStatus?
+    let activityStatus: AgentState?
 
     private let size: CGFloat = 32
-    private let unselectedColor = Color(hex: "#848CAF")!
+    static let unselectedColor = Color(hex: "#848CAF")!
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Circle()
-                .fill(isSelected ? workspace.color : unselectedColor)
+            .fill(isSelected ? workspace.color : WorkspaceAvatarView.unselectedColor)
                 .frame(width: size, height: size)
                 .overlay(
                     Text(workspace.initials)

@@ -22,10 +22,7 @@ struct SidebarView: View {
           VStack {
               HStack {
                 if !isCompact {
-                  Text(agentManager.currentWorkspace?.name.uppercased() ?? "AGENTS")
-                    .font(.callout)
-                    .fontWeight(.semibold)
-                    .foregroundColor(Theme.secondaryText)
+                  HeaderTitleView(title: agentManager.currentWorkspace?.name ?? "Agents")
                 }
 
                 Spacer()
@@ -50,6 +47,9 @@ struct SidebarView: View {
             // Agent list
             ScrollView {
                 LazyVStack(spacing: 4) {
+                    // Overview row
+                    overviewRow
+
                     ForEach(agentManager.currentWorkspaceAgents.filter { !$0.isCompanion }) { agent in
                         AgentContextMenu(
                             agent: agent,
@@ -229,6 +229,58 @@ struct SidebarView: View {
         }
     }
 
+    // MARK: - Overview Row
+
+    private var overviewRow: some View {
+        Group {
+            if isCompact {
+                VStack(spacing: 4) {
+                    Image(systemName: "square.grid.2x2")
+                        .font(.title2)
+                        .foregroundColor(agentManager.showDashboard ? Theme.primaryText : Theme.secondaryText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(agentManager.showDashboard ? Theme.selectionBackground : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(agentManager.showDashboard ? Theme.selectionBorder : Color.primary.opacity(0.5), lineWidth: 1)
+                )
+                .cornerRadius(8)
+                .contentShape(Rectangle())
+                .help("Overview")
+            } else {
+                HStack(spacing: 12) {
+                    Image(systemName: "square.grid.2x2")
+                        .font(.title2)
+                        .foregroundColor(agentManager.showDashboard ? Theme.primaryText : Theme.secondaryText)
+                        .frame(width: 40, height: 40)
+
+                    Text("Overview")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(agentManager.showDashboard ? Theme.primaryText : Theme.secondaryText)
+
+                    Spacer()
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 2)
+                .background(agentManager.showDashboard ? Theme.selectionBackground : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(agentManager.showDashboard ? Theme.selectionBorder : Color.primary.opacity(0.5), lineWidth: 1)
+                )
+                .cornerRadius(8)
+                .contentShape(Rectangle())
+            }
+        }
+        .padding(.bottom, 4)
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                agentManager.showDashboard.toggle()
+            }
+        }
+    }
+
     // MARK: - Drag and Drop
 
     private func handleDrop(items: [String], targetAgentId: UUID, position: DropPosition) -> Bool {
@@ -334,7 +386,7 @@ struct AgentRowView: View {
 
                 if !agent.isShell {
                     Circle()
-                        .fill(agent.status.color)
+                        .fill(agent.state.color)
                         .frame(width: 10, height: 10)
                         .overlay(
                             Circle()
@@ -354,7 +406,7 @@ struct AgentRowView: View {
 
                             if !companion.isShell {
                                 Circle()
-                                    .fill(companion.status.color)
+                                    .fill(companion.state.color)
                                     .frame(width: 6, height: 6)
                                     .overlay(
                                         Circle()
@@ -423,7 +475,7 @@ struct AgentRowView: View {
 
                 if !agent.isShell {
                     Circle()
-                        .fill(agent.status.color)
+                        .fill(agent.state.color)
                         .frame(width: 8, height: 8)
                 }
             }
@@ -440,7 +492,7 @@ struct AgentRowView: View {
                             Spacer()
                             if !companion.isShell {
                                 Circle()
-                                    .fill(companion.status.color)
+                                    .fill(companion.state.color)
                                     .frame(width: 6, height: 6)
                             }
                         }
@@ -462,18 +514,11 @@ struct AgentRowView: View {
     }
 }
 
-private func previewAgent(_ name: String, _ avatar: String, _ folder: String, status: AgentStatus = .idle, title: String = "") -> Agent {
-    var agent = Agent(name: name, avatar: avatar, folder: folder)
-    agent.status = status
-    agent.terminalTitle = title
-    return agent
-}
-
 #Preview("AgentRow") {
     VStack(spacing: 4) {
-        AgentRowView(agent: previewAgent("skwad", "🐱", "/Users/nbonamy/src/skwad"), isSelected: false)
-        AgentRowView(agent: previewAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .running, title: "Editing App.swift"), isSelected: true)
-        AgentRowView(agent: previewAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), isSelected: false)
+        AgentRowView(agent: previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad"), isSelected: false)
+        AgentRowView(agent: previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .running, title: "Editing App.swift"), isSelected: true)
+        AgentRowView(agent: previewDashboardAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), isSelected: false)
     }
     .padding(8)
     .frame(width: 250)
@@ -481,9 +526,9 @@ private func previewAgent(_ name: String, _ avatar: String, _ folder: String, st
 
 #Preview("AgentRow Compact") {
     VStack(spacing: 4) {
-        AgentRowView(agent: previewAgent("skwad", "🐱", "/Users/nbonamy/src/skwad"), isSelected: false, isCompact: true)
-        AgentRowView(agent: previewAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .running, title: "Editing App.swift"), isSelected: true, isCompact: true)
-        AgentRowView(agent: previewAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), isSelected: false, isCompact: true)
+        AgentRowView(agent: previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad"), isSelected: false, isCompact: true)
+        AgentRowView(agent: previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy", status: .running, title: "Editing App.swift"), isSelected: true, isCompact: true)
+        AgentRowView(agent: previewDashboardAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error), isSelected: false, isCompact: true)
     }
     .padding(8)
     .frame(width: 80)
@@ -491,9 +536,9 @@ private func previewAgent(_ name: String, _ avatar: String, _ folder: String, st
 
 @MainActor private func previewAgentManager() -> AgentManager {
     let m = AgentManager()
-    let a1 = previewAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift")
-    let a2 = previewAgent("witsy", "🤖", "/Users/nbonamy/src/witsy")
-    let a3 = previewAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error)
+    let a1 = previewDashboardAgent("skwad", "🐱", "/Users/nbonamy/src/skwad", status: .running, title: "Editing ContentView.swift")
+    let a2 = previewDashboardAgent("witsy", "🤖", "/Users/nbonamy/src/witsy")
+    let a3 = previewDashboardAgent("broken", "🦊", "/Users/nbonamy/src/broken", status: .error)
     m.agents = [a1, a2, a3]
     let workspace = Workspace(name: "Preview", colorHex: WorkspaceColor.blue.rawValue, agentIds: [a1.id, a2.id, a3.id])
     m.workspaces = [workspace]

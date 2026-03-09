@@ -89,16 +89,20 @@ struct TerminalCommandBuilder {
   // MARK: - Registration Prompt Strings
 
   /// The user prompt sent to Claude on first launch to trigger the agent list table.
-  static let registrationUserPrompt = "List other agents names and project (no ID) in a table based on context."
+  static let registrationUserPrompt = "List other agents names and project (no ID) in a table based on context then set your status to indicate you are ready to get going!"
 
   /// System prompt for agents that support it (currently none besides Claude)
-  private static func registrationSystemPrompt(agentId: UUID) -> String {
-    "You are part of a team of agents called a skwad. A skwad is made of high-performing agents who collaborate to achieve complex goals so engage with them: ask for help and in return help them succeed. Your skwad agent ID: \(agentId.uuidString)."
+  private static func skwadInstructions(agentId: UUID) -> String {
+    "You are part of a team of agents called a skwad. A skwad is made of high-performing agents who collaborate to achieve complex goals so engage with them: ask for help and in return help them succeed. Your skwad agent ID: \(agentId.uuidString). CRITICAL RULE: Before you start working on anything, your FIRST action must be calling set-status with what you are about to do. When you finish, call set-status again. When you change direction, call set-status. Other agents depend on your status to coordinate — if you don't update it, the team cannot function. This is not optional."
   }
 
-  /// User prompt for inline registration (used by most agents)
-  private static func registrationUserPrompt(agentId: UUID) -> String {
-    "You are part of a team of agents called a skwad. A skwad is made of high-performing agents who collaborate to achieve complex goals so engage with them: ask for help and in return help them succeed. Your skwad agent ID: \(agentId.uuidString). Register with the skwad"
+  /// Public accessor for re-registration from AgentManager context menu
+  static func registrationPrompt(agentId: UUID) -> String {
+    "\(skwadInstructions(agentId: agentId)) Register with the skwad"
+  }
+
+  private static func registrationSystemPrompt(agentId: UUID) -> String {
+    skwadInstructions(agentId: agentId)
   }
 
   // MARK: - Inline Registration
@@ -185,19 +189,19 @@ struct TerminalCommandBuilder {
     case "opencode":
       // OpenCode: no system prompt support — skip registration on resume
       if isResume { return "" }
-      let userPromptOC = registrationUserPrompt(agentId: agentId)
+      let userPromptOC = registrationPrompt(agentId: agentId)
       return #" --prompt "\#(userPromptOC)""#
 
     case "gemini":
       // Gemini CLI: no system prompt support — skip registration on resume
       if isResume { return "" }
-      let userPromptG = registrationUserPrompt(agentId: agentId)
+      let userPromptG = registrationPrompt(agentId: agentId)
       return #" --prompt-interactive "\#(userPromptG)""#
 
     case "copilot":
       // GitHub Copilot: no system prompt support — skip registration on resume
       if isResume { return "" }
-      let userPromptCP = registrationUserPrompt(agentId: agentId)
+      let userPromptCP = registrationPrompt(agentId: agentId)
       return #" --interactive "\#(userPromptCP)""#
 
     default:

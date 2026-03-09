@@ -27,15 +27,15 @@ final class SidebarViewHelpersTests: XCTestCase {
     // MARK: - Agent Status Color
 
     func testIdleStatusIsGreen() {
-        XCTAssertEqual(AgentStatus.idle.color, .green)
+        XCTAssertEqual(AgentState.idle.color, .green)
     }
 
     func testRunningStatusIsOrange() {
-        XCTAssertEqual(AgentStatus.running.color, .orange)
+        XCTAssertEqual(AgentState.running.color, .orange)
     }
 
     func testErrorStatusIsRed() {
-        XCTAssertEqual(AgentStatus.error.color, .red)
+        XCTAssertEqual(AgentState.error.color, .red)
     }
 
     // MARK: - Agent Avatar

@@ -41,7 +41,7 @@ struct ConversationHistoryView: View {
         .task(id: agent.id) {
             await historyService.refresh(for: agent.folder, agentType: agent.agentType)
         }
-        .onChange(of: agent.status) { oldValue, newValue in
+        .onChange(of: agent.state) { oldValue, newValue in
             if newValue == .idle {
                 Task {
                     await historyService.refresh(for: agent.folder, agentType: agent.agentType)

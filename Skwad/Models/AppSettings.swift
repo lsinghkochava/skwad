@@ -501,6 +501,7 @@ class AppSettings: ObservableObject {
 
     @AppStorage("savedWorkspacesData") private var savedWorkspacesData: Data = Data()
     @AppStorage("currentWorkspaceId") private var currentWorkspaceIdString: String = ""
+    @AppStorage("showGlobalDashboard") var showGlobalDashboard: Bool = false
 
     var savedWorkspaces: [Workspace] {
         get {

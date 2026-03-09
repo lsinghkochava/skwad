@@ -42,6 +42,7 @@ struct Workspace: Identifiable, Codable, Hashable {
     var focusedPaneIndex: Int
     var splitRatio: CGFloat  // primary split ratio (kept for backwards compatibility, maps to splitRatioPrimary)
     var splitRatioSecondary: CGFloat?  // secondary split ratio - optional for backwards compatibility
+    var showDashboard: Bool?  // whether to show workspace dashboard instead of sidebar+terminal
 
     /// Primary split ratio (vertical in splitVertical/grid, horizontal in splitHorizontal)
     var splitRatioPrimary: CGFloat {
@@ -63,7 +64,8 @@ struct Workspace: Identifiable, Codable, Hashable {
         activeAgentIds: [UUID] = [],
         focusedPaneIndex: Int = 0,
         splitRatio: CGFloat = 0.5,
-        splitRatioSecondary: CGFloat? = nil
+        splitRatioSecondary: CGFloat? = nil,
+        showDashboard: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -74,6 +76,13 @@ struct Workspace: Identifiable, Codable, Hashable {
         self.focusedPaneIndex = focusedPaneIndex
         self.splitRatio = splitRatio
         self.splitRatioSecondary = splitRatioSecondary
+        self.showDashboard = showDashboard
+    }
+
+    /// Whether to show workspace dashboard (defaults to false for migration)
+    var isDashboardVisible: Bool {
+        get { showDashboard ?? false }
+        set { showDashboard = newValue }
     }
 
     var color: Color {

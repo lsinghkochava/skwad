@@ -67,9 +67,9 @@ actor MockAgentDataProvider: AgentDataProvider {
         }
     }
 
-    func updateAgentStatus(for agentId: UUID, status: AgentStatus, source: ActivitySource) async {
+    func updateAgentStatus(for agentId: UUID, status: AgentState, source: ActivitySource) async {
         if let index = _agents.firstIndex(where: { $0.id == agentId }) {
-            _agents[index].status = status
+            _agents[index].state = status
         }
     }
 
@@ -155,6 +155,12 @@ actor MockAgentDataProvider: AgentDataProvider {
         _updatedMetadata.append((agentId: agentId, metadata: metadata))
         if let index = _agents.firstIndex(where: { $0.id == agentId }) {
             _agents[index].metadata.merge(metadata) { _, new in new }
+        }
+    }
+
+    func setAgentStatus(for agentId: UUID, status: String) async {
+        if let index = _agents.firstIndex(where: { $0.id == agentId }) {
+            _agents[index].statusText = status
         }
     }
 
