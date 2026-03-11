@@ -66,6 +66,18 @@ jobs:
           # Set partition list to allow access without prompting
           security set-key-partition-list -S apple-tool:,apple:,security: -k "${{ secrets.APPLE_PASSWORD }}" $KEYCHAIN_PATH
 
+      - name: Free disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h /
+          # Remove unnecessary large components
+          sudo rm -rf /Users/runner/Library/Android
+          sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator
+          sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/WatchOS.platform
+          sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/AppleTVOS.platform
+          echo "Disk space after cleanup:"
+          df -h /
+
       - name: Check changelog
         if: ${{ inputs.release_type == 'latest' }}
         run: make check-changelog

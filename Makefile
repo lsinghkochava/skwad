@@ -107,6 +107,8 @@ export: archive
 		-exportOptionsPlist $(BUILD_DIR)/ExportOptions.plist \
 		-allowProvisioningUpdates
 	@echo "Signed app exported to $(EXPORT_PATH)"
+	@echo "Cleaning up DerivedData to free disk space..."
+	@rm -rf ~/Library/Developer/Xcode/DerivedData/Skwad-*
 
 dmg: export
 	@echo "Creating DMG..."
