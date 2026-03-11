@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.8.0] - WIP
+## [1.8.0] - 2026-11-03
 
 ### Added
 - Dashboard views (global and per-workspace) showing agent status, recent activity, and quick actions
