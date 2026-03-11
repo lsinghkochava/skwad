@@ -155,6 +155,8 @@ notarize: zip
 		--wait
 	@echo "Stapling notarization ticket to app..."
 	xcrun stapler staple "$(EXPORT_PATH)/$(APP_NAME).app"
+	@echo "Cleaning up intermediate artifacts to free disk space..."
+	@rm -rf $(ARCHIVE_PATH)
 	@echo "Creating ZIP with stapled app..."
 	@rm -f $(ZIP_PATH)
 	cd "$(EXPORT_PATH)" && zip -r -y "../$(APP_NAME).zip" "$(APP_NAME).app"
