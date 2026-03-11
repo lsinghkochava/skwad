@@ -66,17 +66,27 @@ jobs:
           # Set partition list to allow access without prompting
           security set-key-partition-list -S apple-tool:,apple:,security: -k "${{ secrets.APPLE_PASSWORD }}" $KEYCHAIN_PATH
 
-      - name: Free disk space
+      - name: Optimize runner for Xcode builds
         run: |
-          echo "Disk space before cleanup:"
-          df -h /
-          # Remove unnecessary large components
+          # Kill background services that compete for CPU/IO during builds
+          # See: https://github.com/actions/runner-images/issues/13096
+          sudo launchctl bootout system/com.apple.PerfPowerServices || true
+          sudo launchctl bootout system/com.apple.metadata.mds || true
+
+          # Install yeetd to kill other resource-wasting Apple daemons
+          curl -L https://github.com/biscuitehh/yeetd/releases/download/1.0/yeetd-normal.pkg -o /tmp/yeetd.pkg
+          sudo installer -pkg /tmp/yeetd.pkg -target /
+          defaults write dev.biscuit.yeetd killapsd true
+          yeetd &
+
+          # Clear stale SPM artifact cache
+          rm -rf ~/Library/Caches/org.swift.swiftpm/artifacts
+
+          # Free disk space
           sudo rm -rf /Users/runner/Library/Android
           sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator
           sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/WatchOS.platform
           sudo rm -rf /Applications/Xcode_*.app/Contents/Developer/Platforms/AppleTVOS.platform
-          echo "Disk space after cleanup:"
-          df -h /
 
       - name: Check changelog
         if: ${{ inputs.release_type == 'latest' }}
