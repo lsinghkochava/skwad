@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [1.8.1] - WIP
 
 ### Added
+- Command Center shortcut (Cmd+0) in View menu
+- Allow editing agent type and persona on existing agents
 
 ### Changed
 - N/A
@@ -12,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Conversation title no longer picks up "check your inbox" injected messages
 - Cmd+1-9 now exits Command Center and switches to workspace
+- Codex launch command no longer breaks on apostrophes in system prompt
 
 ### Removed
 - N/A

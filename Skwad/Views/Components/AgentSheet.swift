@@ -103,6 +103,7 @@ struct AgentSheet: View {
             _name = State(initialValue: agent.name)
             _avatar = State(initialValue: agent.avatar ?? "🤖")
             _selectedAgentType = State(initialValue: agent.agentType)
+            _selectedPersonaId = State(initialValue: agent.personaId)
             _shouldApplyPrefillWorktree = State(initialValue: true)
         } else if let prefill = prefill {
             _selectedFolder = State(initialValue: prefill.folder)
@@ -165,25 +166,23 @@ struct AgentSheet: View {
                     }
                 }
 
-                // Section 2: Coding Agent (only when creating)
-                if !isEditing {
-                    Section {
-                        AgentTypePicker(label: "Coding Agent", selection: $selectedAgentType)
+                // Section 2: Coding Agent
+                Section {
+                    AgentTypePicker(label: "Coding Agent", selection: $selectedAgentType)
 
-                        if selectedAgentType == "shell" {
-                            LabeledContent("Command") {
-                                TextField("", text: $shellCommand, prompt: Text("Optional shell command"))
-                                    .textFieldStyle(.plain)
-                            }
+                    if !isEditing && selectedAgentType == "shell" {
+                        LabeledContent("Command") {
+                            TextField("", text: $shellCommand, prompt: Text("Optional shell command"))
+                                .textFieldStyle(.plain)
                         }
+                    }
 
-                        if TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
-                            LabeledContent("Persona") {
-                                Picker("", selection: $selectedPersonaId) {
-                                    Text("None").tag(nil as UUID?)
-                                    ForEach(settings.personas) { persona in
-                                        Text(persona.name).tag(persona.id as UUID?)
-                                    }
+                    if TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
+                        LabeledContent("Persona") {
+                            Picker("", selection: $selectedPersonaId) {
+                                Text("None").tag(nil as UUID?)
+                                ForEach(settings.personas) { persona in
+                                    Text(persona.name).tag(persona.id as UUID?)
                                 }
                             }
                         }
@@ -431,7 +430,7 @@ struct AgentSheet: View {
         let showCompanionToggle = hasCompanions && ((isEditing && folderChanged) || isForking)
         if showCompanionToggle { height += 40 }
         if canForkConversation { height += 40 }
-        if !isEditing && TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
+        if TerminalCommandBuilder.supportsSystemPrompt(agentType: selectedAgentType) && !settings.personas.isEmpty {
             height += 40
         }
         return height
@@ -628,11 +627,16 @@ struct AgentSheet: View {
     private func updateAgent() {
         guard let agent = editingAgent else { return }
         let folderChanged = !selectedFolder.isEmpty && selectedFolder != agent.folder
+        let agentTypeChanged = selectedAgentType != agent.agentType
+        let personaChanged = selectedPersonaId != agent.personaId
         agentManager.updateAgent(
             id: agent.id,
             name: name.isEmpty ? agent.folder.split(separator: "/").last.map(String.init) ?? "Agent" : name,
             avatar: avatar,
             folder: folderChanged ? selectedFolder : nil,
+            agentType: agentTypeChanged ? selectedAgentType : nil,
+            personaId: personaChanged ? selectedPersonaId : nil,
+            personaChanged: personaChanged,
             relocateCompanions: relocateCompanions
         )
         dismiss()

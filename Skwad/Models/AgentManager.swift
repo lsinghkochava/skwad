@@ -749,16 +749,26 @@ final class AgentManager {
         agents[index].terminalTitle = ""
     }
 
-    func updateAgent(id: UUID, name: String, avatar: String, folder: String? = nil, relocateCompanions: Bool = false) {
+    func updateAgent(id: UUID, name: String, avatar: String, folder: String? = nil, agentType: String? = nil, personaId: UUID? = nil, personaChanged: Bool = false, relocateCompanions: Bool = false) {
         guard let index = agents.firstIndex(where: { $0.id == id }) else { return }
         let oldFolder = agents[index].folder
+        var needsRestart = false
         agents[index].name = name
         agents[index].avatar = avatar
 
+        if let agentType = agentType, agentType != agents[index].agentType {
+            agents[index].agentType = agentType
+            needsRestart = true
+        }
+
+        if personaChanged {
+            agents[index].personaId = personaId
+            needsRestart = true
+        }
+
         if let folder = folder, folder != oldFolder {
             agents[index].folder = folder
-            // Restart the agent itself since folder changed
-            restartAgent(agents[index])
+            needsRestart = true
 
             if relocateCompanions {
                 for companion in companions(of: id) {
@@ -769,6 +779,10 @@ final class AgentManager {
                     }
                 }
             }
+        }
+
+        if needsRestart {
+            restartAgent(agents[index])
         }
 
         saveAgents()
