@@ -5,14 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [1.8.1] - WIP
 
 ### Added
-- Command Center shortcut (Cmd+0) in View menu
-- Cmd+1-9 now exits Command Center and switches to workspace
 
 ### Changed
 - N/A
 
 ### Fixed
 - Conversation title no longer picks up "check your inbox" injected messages
+- Cmd+1-9 now exits Command Center and switches to workspace
 
 ### Removed
 - N/A

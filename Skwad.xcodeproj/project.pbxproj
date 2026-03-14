@@ -22,6 +22,7 @@
 		8D2673CA2F31592C0043E3A6 /* VoiceInputOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2673C82F31592C0043E3A6 /* VoiceInputOverlay.swift */; };
 		8D2673CB2F31592C0043E3A6 /* PushToTalkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2673C62F31592C0043E3A6 /* PushToTalkMonitor.swift */; };
 		8D334BC82F35104700FB0E95 /* AgentContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D334BC72F35104700FB0E95 /* AgentContextMenu.swift */; };
+		8D3747302F661DCC00BDD584 /* ThreeFingerDoubleTap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D37472F2F661DCC00BDD584 /* ThreeFingerDoubleTap.swift */; };
 		8D3ED4ED2F344CB70023AA53 /* MenuBarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3ED4EC2F344CB70023AA53 /* MenuBarManager.swift */; };
 		8D3F44C72F30EB2000407F17 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = SP000002 /* Sparkle */; };
 		8D6B97222F2DC17900CE877E /* MCPMessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D6B97212F2DC17900CE877E /* MCPMessageStore.swift */; };
@@ -237,6 +238,7 @@
 		8D2673C72F31592C0043E3A6 /* VoiceInputManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputManager.swift; sourceTree = "<group>"; };
 		8D2673C82F31592C0043E3A6 /* VoiceInputOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputOverlay.swift; sourceTree = "<group>"; };
 		8D334BC72F35104700FB0E95 /* AgentContextMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMenu.swift; sourceTree = "<group>"; };
+		8D37472F2F661DCC00BDD584 /* ThreeFingerDoubleTap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeFingerDoubleTap.swift; sourceTree = "<group>"; };
 		8D3ED4EC2F344CB70023AA53 /* MenuBarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarManager.swift; sourceTree = "<group>"; };
 		8D6B97212F2DC17900CE877E /* MCPMessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPMessageStore.swift; sourceTree = "<group>"; };
 		8D6B97232F2DC47300CE877E /* AsyncDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncDelay.swift; sourceTree = "<group>"; };
@@ -930,16 +932,17 @@
 			isa = PBXGroup;
 			children = (
 				8D6B97232F2DC47300CE877E /* AsyncDelay.swift */,
+				UT100006 /* AvatarUtils.swift */,
 				UT100001 /* Clipboard.swift */,
+				FW000002 /* FileWatcher.swift */,
+				UT100008 /* FuzzyScorer.swift */,
 				UT100004 /* ManagedTimer.swift */,
 				8D6B972B2F2E32DD00CE877E /* NSImage+Scaling.swift */,
-				UT100006 /* AvatarUtils.swift */,
-				UT100007 /* VoiceAudioUtils.swift */,
 				UT100005 /* PathUtils.swift */,
-				UT100008 /* FuzzyScorer.swift */,
 				UT100002 /* TerminalTextCleaner.swift */,
-				FW000002 /* FileWatcher.swift */,
+				8D37472F2F661DCC00BDD584 /* ThreeFingerDoubleTap.swift */,
 				8D6B97242F2DC47300CE877E /* TimingConstants.swift */,
+				UT100007 /* VoiceAudioUtils.swift */,
 				UT100003 /* WindowResizeObserver.swift */,
 			);
 			path = Utilities;
@@ -1086,6 +1089,7 @@
 				SR000004 /* TerminalCommandBuilder.swift in Sources */,
 				SR000006 /* TerminalSessionController.swift in Sources */,
 				SR000007 /* TerminalAdapter.swift in Sources */,
+				8D3747302F661DCC00BDD584 /* ThreeFingerDoubleTap.swift in Sources */,
 				8D8C02FF2F53FBAE00A06866 /* ArtifactPanelView.swift in Sources */,
 				8D8C03002F53FBAE00A06866 /* MarkdownPanelView.swift in Sources */,
 				8DDBB0772F5E2F900000173C /* HeaderTitleView.swift in Sources */,
@@ -1429,7 +1433,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.8.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kochava.skwad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1461,7 +1465,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.8.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kochava.skwad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1479,7 +1483,7 @@
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.8.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kochava.skwad.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1497,7 +1501,7 @@
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.8.0;
+				MARKETING_VERSION = 1.8.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kochava.skwad.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
