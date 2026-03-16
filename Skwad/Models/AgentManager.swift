@@ -203,6 +203,32 @@ final class AgentManager {
         switchToWorkspace(workspaces[index].id)
     }
 
+    func cycleWorkspace() {
+        if showGlobalDashboard {
+            // Command Center → first workspace
+            showGlobalDashboard = false
+            showDashboard = false
+            if let first = workspaces.first {
+                switchToWorkspace(first.id)
+            }
+        } else if let currentId = currentWorkspaceId,
+                  let currentIndex = workspaces.firstIndex(where: { $0.id == currentId }) {
+            let nextIndex = currentIndex + 1
+            if nextIndex < workspaces.count {
+                // Current workspace → next workspace
+                switchToWorkspace(workspaces[nextIndex].id)
+            } else {
+                // Last workspace → Command Center
+                showGlobalDashboard = true
+                showDashboard = false
+            }
+        } else {
+            // Fallback: go to Command Center
+            showGlobalDashboard = true
+            showDashboard = false
+        }
+    }
+
     func moveWorkspace(from source: IndexSet, to destination: Int) {
         workspaces.move(fromOffsets: source, toOffset: destination)
         saveWorkspaces()

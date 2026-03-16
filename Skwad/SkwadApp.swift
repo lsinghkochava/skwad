@@ -269,18 +269,12 @@ struct SkwadApp: App {
                 .keyboardShortcut("b", modifiers: [.command, .option])
                 .disabled(isAnyDashboardVisible)
 
-                Button("Toggle Dashboard") {
+                Button("Cycle Workspace") {
                     withAnimation(.easeInOut(duration: 0.25)) {
-                        if agentManager.showGlobalDashboard {
-                            agentManager.showGlobalDashboard = false
-                        } else if agentManager.showDashboard {
-                            agentManager.showDashboard = false
-                        } else {
-                            agentManager.showDashboard = true
-                        }
+                        agentManager.cycleWorkspace()
                     }
                 }
-                .keyboardShortcut("d", modifiers: [.command, .shift])
+                .keyboardShortcut("`", modifiers: .command)
 
                 Button("Next Agent") {
                     agentManager.selectNextAgent()
