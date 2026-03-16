@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.8.1] - WIP
+## [1.8.1] - 2026-03-16
 
 ### Added
-- N/A
+- Cmd+` to cycle through workspaces
 
 ### Changed
 - Allow editing agent type and persona on existing agents
@@ -19,7 +19,7 @@ All notable changes to this project will be documented in this file.
 - N/A
 
 
-## [1.8.0] - 2026-11-03
+## [1.8.0] - 2026-03-11
 
 ### Added
 - Dashboard views (global and per-workspace) showing agent status, recent activity, and quick actions
