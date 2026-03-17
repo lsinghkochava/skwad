@@ -14,6 +14,8 @@ struct WorkspaceBarView: View {
     @State private var workspaceToEdit: Workspace?
     @State private var workspaceToRestart: Workspace?
     @State private var workspaceToClose: Workspace?
+    @State private var workspaceToDetach: Workspace?
+    @State private var suppressDetachWarning = false
 
     private var backgroundColor: Color {
         // In previews, use SwiftUI color scheme
@@ -79,6 +81,19 @@ struct WorkspaceBarView: View {
                             Label("Restart Workspace", systemImage: "arrow.clockwise")
                         }
                         .disabled(workspace.agentIds.isEmpty)
+
+                        Divider()
+
+                        Button {
+                            if agentManager.detachNeedsConfirmation(workspace) {
+                                suppressDetachWarning = settings.suppressDetachWarning
+                                workspaceToDetach = workspace
+                            } else {
+                                agentManager.detachWorkspace(workspace)
+                            }
+                        } label: {
+                            Label("Detach to Window", systemImage: "macwindow.on.rectangle")
+                        }
 
                         Divider()
 
@@ -185,6 +200,21 @@ struct WorkspaceBarView: View {
                 }
             }
         }
+        .sheet(item: $workspaceToDetach) { workspace in
+            DetachConfirmationSheet(
+                workspaceName: workspace.name,
+                suppressWarning: $suppressDetachWarning
+            ) {
+                // On confirm
+                if suppressDetachWarning {
+                    settings.suppressDetachWarning = true
+                }
+                agentManager.detachWorkspace(workspace)
+                workspaceToDetach = nil
+            } onCancel: {
+                workspaceToDetach = nil
+            }
+        }
     }
 
     private func restartWorkspace(_ workspace: Workspace) {
@@ -230,6 +260,55 @@ struct WorkspaceAvatarView: View {
         }
         .frame(width: size, height: size)
         .help(workspace.name)
+    }
+}
+
+// MARK: - Detach Confirmation Sheet
+
+struct DetachConfirmationSheet: View {
+    let workspaceName: String
+    @Binding var suppressWarning: Bool
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "macwindow.on.rectangle")
+                .font(.system(size: 32))
+                .foregroundColor(.accentColor)
+
+            Text("Detach Workspace?")
+                .font(.headline)
+
+            Text("All agents in \"\(workspaceName)\" will be restarted.")
+                .font(.body)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Toggle("Don't ask again", isOn: $suppressWarning)
+                .font(.callout)
+                .padding(.top, 4)
+
+            HStack {
+                Button("Cancel") {
+                    dismiss()
+                    onCancel()
+                }
+                .keyboardShortcut(.escape, modifiers: [])
+
+                Spacer()
+
+                Button("Detach") {
+                    dismiss()
+                    onConfirm()
+                }
+                .keyboardShortcut(.return, modifiers: [])
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding()
+        .frame(width: 320)
     }
 }
 

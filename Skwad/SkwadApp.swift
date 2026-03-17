@@ -23,6 +23,8 @@ struct SkwadApp: App {
     @State private var toggleSidebar = false
     @State private var toggleFileFinder = false
     @State private var forkPrefill: AgentPrefill?
+    @State private var showDetachConfirmation = false
+    @State private var suppressDetachWarning = false
 
     private var settings: AppSettings { AppSettings.shared }
 
@@ -104,6 +106,22 @@ struct SkwadApp: App {
                 .sheet(item: $forkPrefill) { prefill in
                     AgentSheet(prefill: prefill)
                         .environment(agentManager)
+                }
+                .sheet(isPresented: $showDetachConfirmation) {
+                    if let workspace = agentManager.currentWorkspace {
+                        DetachConfirmationSheet(
+                            workspaceName: workspace.name,
+                            suppressWarning: $suppressDetachWarning
+                        ) {
+                            if suppressDetachWarning {
+                                settings.suppressDetachWarning = true
+                            }
+                            agentManager.detachWorkspace(workspace)
+                            showDetachConfirmation = false
+                        } onCancel: {
+                            showDetachConfirmation = false
+                        }
+                    }
                 }
                 .onAppear {
 
@@ -271,6 +289,12 @@ struct SkwadApp: App {
                 .keyboardShortcut("b", modifiers: [.command, .option])
                 .disabled(isAnyDashboardVisible)
 
+                Button("Detach Workspace") {
+                    detachCurrentWorkspace()
+                }
+                .keyboardShortcut("d", modifiers: [.command, .shift])
+                .disabled(agentManager.currentWorkspace == nil)
+
                 Button("Cycle Workspace") {
                     withAnimation(.easeInOut(duration: 0.25)) {
                         agentManager.cycleWorkspace()
@@ -364,6 +388,16 @@ struct SkwadApp: App {
     private func createCompanionShell() {
         guard let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }) else { return }
         agentManager.createShellCompanion(for: agent)
+    }
+
+    private func detachCurrentWorkspace() {
+        guard let workspace = agentManager.currentWorkspace else { return }
+        if agentManager.detachNeedsConfirmation(workspace) {
+            suppressDetachWarning = settings.suppressDetachWarning
+            showDetachConfirmation = true
+        } else {
+            agentManager.detachWorkspace(workspace)
+        }
     }
 
     private func openActiveAgentInDefaultApp() {
