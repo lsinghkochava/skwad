@@ -202,6 +202,7 @@
 		WS000001 /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = WS100001 /* Workspace.swift */; };
 		WS000002 /* WorkspaceBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WS100002 /* WorkspaceBarView.swift */; };
 		WS000003 /* WorkspaceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = WS100003 /* WorkspaceSheet.swift */; };
+		WS000004 /* DetachedWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WS100004 /* DetachedWorkspaceView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -417,6 +418,7 @@
 		WS100001 /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		WS100002 /* WorkspaceBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceBarView.swift; sourceTree = "<group>"; };
 		WS100003 /* WorkspaceSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSheet.swift; sourceTree = "<group>"; };
+		WS100004 /* DetachedWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetachedWorkspaceView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -961,6 +963,7 @@
 			children = (
 				WS100002 /* WorkspaceBarView.swift */,
 				WS100003 /* WorkspaceSheet.swift */,
+				WS100004 /* DetachedWorkspaceView.swift */,
 			);
 			path = Workspace;
 			sourceTree = "<group>";
@@ -1112,6 +1115,7 @@
 				WS000001 /* Workspace.swift in Sources */,
 				WS000002 /* WorkspaceBarView.swift in Sources */,
 				WS000003 /* WorkspaceSheet.swift in Sources */,
+				WS000004 /* DetachedWorkspaceView.swift in Sources */,
 				F8001004 /* AgentManager.swift in Sources */,
 				F8001005 /* SidebarView.swift in Sources */,
 				F8001007 /* TerminalHostView.swift in Sources */,

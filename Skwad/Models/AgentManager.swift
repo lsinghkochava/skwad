@@ -33,6 +33,9 @@ final class AgentManager {
     // All agents across all workspaces
     var agents: [Agent] = []
 
+    /// Callback to open a detached workspace window (set by SkwadApp)
+    var openDetachedWindow: ((UUID) -> Void)?
+
     // Global dashboard state (persisted via AppSettings)
     var showGlobalDashboard: Bool {
         get { settings.showGlobalDashboard }
@@ -259,6 +262,11 @@ final class AgentManager {
 
     // MARK: - Detach / Reattach
 
+    /// Whether detach needs confirmation (agents will be restarted)
+    func detachNeedsConfirmation(_ workspace: Workspace) -> Bool {
+        !settings.suppressDetachWarning && !workspace.agentIds.isEmpty
+    }
+
     /// Detach a workspace to its own window — restarts all agents
     func detachWorkspace(_ workspace: Workspace) {
         guard let index = workspaces.firstIndex(where: { $0.id == workspace.id }) else { return }
@@ -283,6 +291,9 @@ final class AgentManager {
         }
 
         saveWorkspaces()
+
+        // Open the detached window
+        openDetachedWindow?(workspace.id)
     }
 
     /// Reattach a detached workspace back to the main window — restarts all agents

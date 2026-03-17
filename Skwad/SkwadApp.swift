@@ -69,13 +69,15 @@ struct SkwadApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(
-                showNewAgentSheet: $showNewAgentSheet,
-                toggleGitPanel: $toggleGitPanel,
-                toggleSidebar: $toggleSidebar,
-                toggleFileFinder: $toggleFileFinder,
-                forkPrefill: $forkPrefill
-            )
+            DetachedWindowBridge(agentManager: agentManager) {
+                ContentView(
+                    showNewAgentSheet: $showNewAgentSheet,
+                    toggleGitPanel: $toggleGitPanel,
+                    toggleSidebar: $toggleSidebar,
+                    toggleFileFinder: $toggleFileFinder,
+                    forkPrefill: $forkPrefill
+                )
+            }
                 .environment(agentManager)
                 .alert("Folder Not Found", isPresented: $showAlert) {
                     Button("OK", role: .cancel) {}
@@ -316,6 +318,16 @@ struct SkwadApp: App {
             }
         }
 
+        // Detached workspace windows — one per workspace
+        WindowGroup("Workspace", id: "detached-workspace", for: UUID.self) { $workspaceId in
+            if let workspaceId {
+                DetachedWorkspaceView(workspaceId: workspaceId)
+                    .environment(agentManager)
+            }
+        }
+        .windowStyle(.hiddenTitleBar)
+        .defaultSize(width: 1000, height: 700)
+
         Settings {
             SettingsView()
         }
@@ -359,6 +371,30 @@ struct SkwadApp: App {
             return
         }
         OpenWithProvider.open(agent.folder, withAppId: settings.defaultOpenWithApp)
+    }
+}
+
+// MARK: - Detached Window Bridge
+
+/// Bridges SwiftUI's openWindow environment action to AgentManager
+/// and restores detached workspace windows on launch.
+private struct DetachedWindowBridge<Content: View>: View {
+    let agentManager: AgentManager
+    @Environment(\.openWindow) private var openWindow
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        content()
+            .onAppear {
+                agentManager.openDetachedWindow = { workspaceId in
+                    openWindow(id: "detached-workspace", value: workspaceId)
+                }
+
+                // Restore detached windows on launch
+                for workspace in agentManager.detachedWorkspaces {
+                    openWindow(id: "detached-workspace", value: workspace.id)
+                }
+            }
     }
 }
 

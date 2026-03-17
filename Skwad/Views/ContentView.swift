@@ -258,9 +258,15 @@ struct ContentView: View {
     }
   }
 
+  /// Agents that belong to attached (non-detached) workspaces
+  private var attachedAgents: [Agent] {
+    let detachedAgentIds = Set(agentManager.detachedWorkspaces.flatMap(\.agentIds))
+    return agentManager.agents.filter { !detachedAgentIds.contains($0.id) }
+  }
+
   @ViewBuilder
   private func terminalViews(in geo: GeometryProxy) -> some View {
-    ForEach(agentManager.agents) { agent in
+    ForEach(attachedAgents) { agent in
       terminalView(for: agent, in: geo)
     }
   }
