@@ -169,7 +169,7 @@ func reattachWorkspace(_ workspace: Workspace) {
 
 ## Implementation Phases
 
-### Phase 1: Data model + filtering
+### Phase 1: Data model + filtering ✅
 - Add `isDetached` to `Workspace` (with Codable backwards-compat)
 - Add `suppressDetachWarning` to `AppSettings`
 - Add `attachedWorkspaces` computed property to `AgentManager`
@@ -178,32 +178,39 @@ func reattachWorkspace(_ workspace: Workspace) {
 - Tests for the new properties, filtering, detach/reattach logic
 - **Commit**: `feat: add workspace detach/reattach model support`
 
-### Phase 2: Detached window scene + view
+### Phase 2: Detached window scene + view ✅
 - Add `WindowGroup(for: UUID.self)` scene in `SkwadApp`
-- Create `DetachedWorkspaceView` (sidebar + terminal area, no workspace bar)
-- Wire up `openWindow(id:value:)` to open detached workspace
-- Add detach confirmation dialog with "Don't ask again" checkbox
+- Create `DetachedWorkspaceView` (custom sidebar, not reusing SidebarView)
+- Wire up `openWindow(id:value:)` via `DetachedWindowBridge` helper
 - Terminal recreation via `restartToken` bump on detach
 - Auto-reopen detached workspaces on app launch
-- **Commit**: `feat: add detached workspace window`
+- Filter main window's terminal ZStack to exclude detached agents
+- **Commit**: `feat: add detached workspace window scene and view`
 
-### Phase 3: Close handling + re-attach
-- Implement window close interception with re-attach/close/cancel dialog
-- Add "Re-attach" button in detached window header
-- Cmd+W in detached window closes agent
-- Handle app quit with detached windows (terminate all)
-- Handle `applicationShouldTerminateAfterLastWindowClosed` with detached windows
+### Phase 3: Close handling + re-attach ✅
+- Implement `WindowCloseInterceptor` NSViewRepresentable for close button
+- Re-attach/close/cancel dialog on window close
+- Re-attach button in detached window header
+- Fix AppDelegate to only hijack main window's close button
 - **Commit**: `feat: handle detached window close with reattach option`
 
-### Phase 4: UI entry points
-- Add "Detach to Window" to workspace context menu in workspace bar
-- Add "Window > Detach Workspace" menu item
-- Add keyboard shortcut
+### Phase 4: UI entry points ✅
+- "Detach to Window" in workspace context menu
+- "Detach Workspace" in View menu (Cmd+Shift+D)
+- `DetachConfirmationSheet` with "Don't ask again" toggle
 - **Commit**: `feat: add detach workspace UI entry points`
 
-### Phase 5: Polish + edge cases
-- Detached window title shows workspace name (updates on rename)
-- Handle last attached workspace being detached → main window empty state
-- Handle workspace with 0 agents in detached window
-- Menu bar mode compatibility
+### Phase 5: Polish + edge cases ✅
+- `WindowTitleSetter` sets NSWindow title for Mission Control
+- Last workspace detached → main window shows empty state (already handled)
+- Workspace removal triggers `dismiss()` via `onChange`
 - **Commit**: `fix: polish detached workspace edge cases`
+
+## Key Learnings
+
+- **SidebarView coupling**: SidebarView is heavily coupled to `agentManager.currentWorkspace`. For multi-window, it can't be directly reused. The detached window uses a custom simplified sidebar. A future refactor could parameterize SidebarView with a workspace ID.
+- **openWindow bridging**: SwiftUI's `@Environment(\.openWindow)` is only available in View bodies. Used a `DetachedWindowBridge` wrapper view to capture it and wire it to `AgentManager.openDetachedWindow` callback.
+- **NSWindow close interception**: Used `NSViewRepresentable` to access the hosting window and replace the close button's target/action. The key is deferring window access to `DispatchQueue.main.async` since the view isn't in a window yet during `makeNSView`.
+- **AppDelegate window hijacking**: The existing `setupWindowCloseObserver` was hijacking close buttons on ALL windows. Fixed by tracking the first main window and only replacing its close button.
+- **Codable migration**: Using `var isDetached: Bool?` (optional) with a computed `isDetachedFromMain` accessor provides seamless backwards compatibility — old persisted workspaces decode to nil which defaults to false.
+- **Cmd+W in detached windows**: Deferred — requires per-window focus tracking since `AgentManager.activeAgentId` is scoped to `currentWorkspaceId`. Would need either per-window workspace context or NSWindow focus detection.
