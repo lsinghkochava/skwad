@@ -91,9 +91,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                   let window = notification.object as? NSWindow,
                   window.canBecomeMain else { return }
 
-            self.mainWindow = window
+            // Only hijack the first main window (not detached workspace windows)
+            if self.mainWindow == nil {
+                self.mainWindow = window
+            }
 
-            // Replace the close button's target/action so it hides instead of closes
+            // Only replace close button for the main window
+            guard window === self.mainWindow else { return }
+
             if let closeButton = window.standardWindowButton(.closeButton) {
                 closeButton.target = self
                 closeButton.action = #selector(self.closeButtonClicked)

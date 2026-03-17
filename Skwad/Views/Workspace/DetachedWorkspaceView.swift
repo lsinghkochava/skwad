@@ -14,6 +14,7 @@ struct DetachedWorkspaceView: View {
     @State private var forkPrefill: AgentPrefill?
     @State private var artifactExpanded = false
     @State private var lastPaneRects: [UUID: CGRect] = [:]
+    @State private var showCloseDialog = false
 
     let workspaceId: UUID
 
@@ -99,6 +100,28 @@ struct DetachedWorkspaceView: View {
         .sheet(item: $forkPrefill) { prefill in
             AgentSheet(prefill: prefill)
                 .environment(agentManager)
+        }
+        .background(
+            WindowCloseInterceptor(onCloseAttempt: {
+                showCloseDialog = true
+            })
+        )
+        .alert("Close Workspace Window", isPresented: $showCloseDialog) {
+            Button("Re-attach") {
+                if let ws = workspace {
+                    agentManager.reattachWorkspace(ws)
+                }
+            }
+            Button("Close Workspace", role: .destructive) {
+                if let ws = workspace {
+                    agentManager.removeWorkspace(ws)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            if let ws = workspace {
+                Text("What would you like to do with \"\(ws.name)\"?")
+            }
         }
     }
 
@@ -328,6 +351,49 @@ struct DetachedWorkspaceView: View {
                 }
             )
             .transition(.move(edge: .trailing))
+        }
+    }
+}
+
+// MARK: - Window Close Interceptor
+
+/// NSViewRepresentable that intercepts the window close button to show a custom dialog.
+private struct WindowCloseInterceptor: NSViewRepresentable {
+    let onCloseAttempt: () -> Void
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        // Defer window access to next runloop (view isn't in window yet)
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            context.coordinator.window = window
+            // Replace close button target
+            if let closeButton = window.standardWindowButton(.closeButton) {
+                closeButton.target = context.coordinator
+                closeButton.action = #selector(Coordinator.closeButtonClicked)
+            }
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.onCloseAttempt = onCloseAttempt
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onCloseAttempt: onCloseAttempt)
+    }
+
+    class Coordinator: NSObject {
+        var onCloseAttempt: () -> Void
+        weak var window: NSWindow?
+
+        init(onCloseAttempt: @escaping () -> Void) {
+            self.onCloseAttempt = onCloseAttempt
+        }
+
+        @objc func closeButtonClicked() {
+            onCloseAttempt()
         }
     }
 }
