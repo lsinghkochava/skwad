@@ -136,11 +136,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func closeCurrentAgent() {
         DispatchQueue.main.async { [weak self] in
-            guard let manager = self?.agentManager,
-                  let activeId = manager.activeAgentId,
-                  let agent = manager.agents.first(where: { $0.id == activeId }) else {
-                return
-            }
+            guard let manager = self?.agentManager else { return }
+            // Use the key window to determine which agent to close
+            // (supports both main window and detached workspace windows)
+            guard let agent = manager.focusedAgent(for: NSApp.keyWindow) else { return }
             manager.removeAgent(agent)
         }
     }

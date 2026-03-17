@@ -103,9 +103,13 @@ struct DetachedWorkspaceView: View {
                 .environment(agentManager)
         }
         .background(
-            WindowCloseInterceptor(onCloseAttempt: {
-                showCloseDialog = true
-            })
+            WindowCloseInterceptor(
+                workspaceId: workspaceId,
+                agentManager: agentManager,
+                onCloseAttempt: {
+                    showCloseDialog = true
+                }
+            )
         )
         .alert("Close Workspace Window", isPresented: $showCloseDialog) {
             Button("Re-attach") {
@@ -377,8 +381,11 @@ private struct WindowTitleSetter: NSViewRepresentable {
 
 // MARK: - Window Close Interceptor
 
-/// NSViewRepresentable that intercepts the window close button to show a custom dialog.
+/// NSViewRepresentable that intercepts the window close button and registers the window
+/// in AgentManager's detachedWindowMap for Cmd+W routing.
 private struct WindowCloseInterceptor: NSViewRepresentable {
+    let workspaceId: UUID
+    let agentManager: AgentManager
     let onCloseAttempt: () -> Void
 
     func makeNSView(context: Context) -> NSView {
@@ -387,6 +394,8 @@ private struct WindowCloseInterceptor: NSViewRepresentable {
         DispatchQueue.main.async {
             guard let window = view.window else { return }
             context.coordinator.window = window
+            // Register this window for Cmd+W routing
+            agentManager.detachedWindowMap[ObjectIdentifier(window)] = workspaceId
             // Replace close button target
             if let closeButton = window.standardWindowButton(.closeButton) {
                 closeButton.target = context.coordinator
@@ -400,16 +409,25 @@ private struct WindowCloseInterceptor: NSViewRepresentable {
         context.coordinator.onCloseAttempt = onCloseAttempt
     }
 
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        // Unregister when view is removed
+        if let window = coordinator.window {
+            coordinator.agentManager?.detachedWindowMap.removeValue(forKey: ObjectIdentifier(window))
+        }
+    }
+
     func makeCoordinator() -> Coordinator {
-        Coordinator(onCloseAttempt: onCloseAttempt)
+        Coordinator(onCloseAttempt: onCloseAttempt, agentManager: agentManager)
     }
 
     class Coordinator: NSObject {
         var onCloseAttempt: () -> Void
         weak var window: NSWindow?
+        weak var agentManager: AgentManager?
 
-        init(onCloseAttempt: @escaping () -> Void) {
+        init(onCloseAttempt: @escaping () -> Void, agentManager: AgentManager) {
             self.onCloseAttempt = onCloseAttempt
+            self.agentManager = agentManager
         }
 
         @objc func closeButtonClicked() {

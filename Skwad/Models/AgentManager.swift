@@ -36,6 +36,9 @@ final class AgentManager {
     /// Callback to open a detached workspace window (set by SkwadApp)
     var openDetachedWindow: ((UUID) -> Void)?
 
+    /// Maps NSWindow to workspace ID for detached windows (for Cmd+W routing)
+    var detachedWindowMap: [ObjectIdentifier: UUID] = [:]
+
     // Global dashboard state (persisted via AppSettings)
     var showGlobalDashboard: Bool {
         get { settings.showGlobalDashboard }
@@ -86,6 +89,28 @@ final class AgentManager {
                 applyCompanionLayout(for: activeId)
             }
         }
+    }
+
+    // MARK: - Window → Agent Mapping
+
+    /// Returns the focused agent for a given window.
+    /// For the main window, uses currentWorkspace. For detached windows, uses the mapped workspace.
+    func focusedAgent(for window: NSWindow?) -> Agent? {
+        guard let window else { return nil }
+        let windowId = ObjectIdentifier(window)
+        if let workspaceId = detachedWindowMap[windowId],
+           let workspace = workspaces.first(where: { $0.id == workspaceId }) {
+            let focusedIndex = workspace.focusedPaneIndex
+            guard focusedIndex < workspace.activeAgentIds.count else {
+                guard let firstId = workspace.activeAgentIds.first else { return nil }
+                return agents.first { $0.id == firstId }
+            }
+            let agentId = workspace.activeAgentIds[focusedIndex]
+            return agents.first { $0.id == agentId }
+        }
+        // Default: main window — use activeAgentId
+        guard let id = activeAgentId else { return nil }
+        return agents.first { $0.id == id }
     }
 
     // MARK: - Attached / Detached Workspaces
