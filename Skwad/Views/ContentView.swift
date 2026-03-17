@@ -54,7 +54,7 @@ struct ContentView: View {
   }
 
   private var shouldShowEmptyState: Bool {
-    !isAnyDashboardVisible && (agentManager.workspaces.isEmpty || agentManager.currentWorkspaceAgents.isEmpty)
+    !isAnyDashboardVisible && (agentManager.attachedWorkspaces.isEmpty || agentManager.currentWorkspaceAgents.isEmpty)
   }
 
   private var shouldShowLayoutToggle: Bool {
@@ -219,7 +219,7 @@ struct ContentView: View {
 
   @ViewBuilder
   private var workspaceBar: some View {
-    if !agentManager.workspaces.isEmpty {
+    if !agentManager.attachedWorkspaces.isEmpty {
       WorkspaceBarView(sidebarVisible: $sidebarVisible)
         .transition(.move(edge: .leading).combined(with: .opacity))
     }
@@ -335,7 +335,7 @@ struct ContentView: View {
           .font(.system(size: 36, weight: .semibold))
           .foregroundColor(.primary)
 
-        Text(agentManager.workspaces.isEmpty
+        Text(agentManager.attachedWorkspaces.isEmpty
              ? "Start by creating your first workspace"
              : "Add an agent to your workspace")
           .font(.title)

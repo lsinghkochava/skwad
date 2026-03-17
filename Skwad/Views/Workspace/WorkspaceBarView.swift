@@ -56,7 +56,7 @@ struct WorkspaceBarView: View {
                 .help("Global Dashboard")
 
                 // Workspace list
-                ForEach(agentManager.workspaces) { workspace in
+                ForEach(agentManager.attachedWorkspaces) { workspace in
                     WorkspaceAvatarView(
                         workspace: workspace,
                         isSelected: !agentManager.showGlobalDashboard && workspace.id == agentManager.currentWorkspaceId,

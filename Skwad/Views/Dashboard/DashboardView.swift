@@ -16,7 +16,7 @@ struct DashboardView: View {
         if let workspaceId, let ws = agentManager.workspaces.first(where: { $0.id == workspaceId }) {
             return [ws]
         }
-        return agentManager.workspaces
+        return agentManager.attachedWorkspaces
     }
 
     private var isGlobal: Bool { workspaceId == nil }

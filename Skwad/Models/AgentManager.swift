@@ -85,6 +85,18 @@ final class AgentManager {
         }
     }
 
+    // MARK: - Attached / Detached Workspaces
+
+    /// Workspaces visible in the main window (excludes detached)
+    var attachedWorkspaces: [Workspace] {
+        workspaces.filter { !$0.isDetachedFromMain }
+    }
+
+    /// Workspaces detached to their own windows
+    var detachedWorkspaces: [Workspace] {
+        workspaces.filter { $0.isDetachedFromMain }
+    }
+
     // MARK: - Current Workspace
 
     var currentWorkspace: Workspace? {
@@ -204,21 +216,22 @@ final class AgentManager {
     }
 
     func cycleWorkspace() {
+        let attached = attachedWorkspaces
         if showGlobalDashboard {
-            // Command Center → first workspace
+            // Command Center → first attached workspace
             showGlobalDashboard = false
             showDashboard = false
-            if let first = workspaces.first {
+            if let first = attached.first {
                 switchToWorkspace(first.id)
             }
         } else if let currentId = currentWorkspaceId,
-                  let currentIndex = workspaces.firstIndex(where: { $0.id == currentId }) {
+                  let currentIndex = attached.firstIndex(where: { $0.id == currentId }) {
             let nextIndex = currentIndex + 1
-            if nextIndex < workspaces.count {
-                // Current workspace → next workspace
-                switchToWorkspace(workspaces[nextIndex].id)
+            if nextIndex < attached.count {
+                // Current workspace → next attached workspace
+                switchToWorkspace(attached[nextIndex].id)
             } else {
-                // Last workspace → Command Center
+                // Last attached workspace → Command Center
                 showGlobalDashboard = true
                 showDashboard = false
             }
@@ -242,6 +255,58 @@ final class AgentManager {
         if statuses.contains(.input) { return .input }
         if statuses.contains(.running) { return .running }
         return nil
+    }
+
+    // MARK: - Detach / Reattach
+
+    /// Detach a workspace to its own window — restarts all agents
+    func detachWorkspace(_ workspace: Workspace) {
+        guard let index = workspaces.firstIndex(where: { $0.id == workspace.id }) else { return }
+        workspaces[index].isDetachedFromMain = true
+
+        // Restart all agents in the workspace (terminal recreation)
+        for agentId in workspace.agentIds {
+            if let agentIndex = agents.firstIndex(where: { $0.id == agentId }) {
+                removeController(for: agentId)
+                unregisterTerminal(for: agentId)
+                agents[agentIndex].restartToken = UUID()
+                agents[agentIndex].state = .idle
+                agents[agentIndex].isRegistered = false
+                agents[agentIndex].terminalTitle = ""
+            }
+        }
+
+        // Switch main window to next attached workspace
+        if currentWorkspaceId == workspace.id {
+            currentWorkspaceId = attachedWorkspaces.first?.id
+            settings.currentWorkspaceId = currentWorkspaceId
+        }
+
+        saveWorkspaces()
+    }
+
+    /// Reattach a detached workspace back to the main window — restarts all agents
+    func reattachWorkspace(_ workspace: Workspace) {
+        guard let index = workspaces.firstIndex(where: { $0.id == workspace.id }) else { return }
+        workspaces[index].isDetachedFromMain = false
+
+        // Restart all agents in the workspace (terminal recreation)
+        for agentId in workspace.agentIds {
+            if let agentIndex = agents.firstIndex(where: { $0.id == agentId }) {
+                removeController(for: agentId)
+                unregisterTerminal(for: agentId)
+                agents[agentIndex].restartToken = UUID()
+                agents[agentIndex].state = .idle
+                agents[agentIndex].isRegistered = false
+                agents[agentIndex].terminalTitle = ""
+            }
+        }
+
+        // Switch main window to the reattached workspace
+        currentWorkspaceId = workspace.id
+        settings.currentWorkspaceId = workspace.id
+
+        saveWorkspaces()
     }
 
     private func saveWorkspaces() {

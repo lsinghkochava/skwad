@@ -1188,4 +1188,168 @@ struct AgentManagerTests {
             #expect(manager.agents[0].name == originalName)
         }
     }
+
+    // MARK: - Detach / Reattach Tests
+
+    @Suite("Detach and Reattach")
+    struct DetachReattachTests {
+
+        @Test("attachedWorkspaces excludes detached")
+        @MainActor
+        func attachedWorkspacesExcludesDetached() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws1 = manager.addWorkspace(name: "Attached")
+            let ws2 = manager.addWorkspace(name: "Detached")
+
+            manager.detachWorkspace(ws2)
+
+            #expect(manager.attachedWorkspaces.count == 1)
+            #expect(manager.attachedWorkspaces[0].id == ws1.id)
+        }
+
+        @Test("detachedWorkspaces returns only detached")
+        @MainActor
+        func detachedWorkspacesReturnsOnlyDetached() async {
+            let manager = AgentManagerTests.createTestManager()
+            _ = manager.addWorkspace(name: "Attached")
+            let ws2 = manager.addWorkspace(name: "Detached")
+
+            manager.detachWorkspace(ws2)
+
+            #expect(manager.detachedWorkspaces.count == 1)
+            #expect(manager.detachedWorkspaces[0].id == ws2.id)
+        }
+
+        @Test("detachWorkspace sets isDetached flag")
+        @MainActor
+        func detachWorkspaceSetsFlag() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws = manager.addWorkspace(name: "Test")
+
+            manager.detachWorkspace(ws)
+
+            #expect(manager.workspaces[0].isDetachedFromMain == true)
+        }
+
+        @Test("detachWorkspace switches main to next attached")
+        @MainActor
+        func detachWorkspaceSwitchesMain() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws1 = manager.addWorkspace(name: "First")
+            let ws2 = manager.addWorkspace(name: "Second")
+
+            // Current is ws2 (last added)
+            manager.switchToWorkspace(ws2.id)
+            manager.detachWorkspace(ws2)
+
+            #expect(manager.currentWorkspaceId == ws1.id)
+        }
+
+        @Test("detachWorkspace bumps restartToken for all agents")
+        @MainActor
+        func detachWorkspaceBumpsTokens() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 2)
+            let token0 = manager.agents[0].restartToken
+            let token1 = manager.agents[1].restartToken
+
+            manager.detachWorkspace(manager.workspaces[0])
+
+            #expect(manager.agents[0].restartToken != token0)
+            #expect(manager.agents[1].restartToken != token1)
+        }
+
+        @Test("detachWorkspace clears agent runtime state")
+        @MainActor
+        func detachWorkspaceClearsState() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 1)
+            manager.agents[0].state = .running
+            manager.agents[0].isRegistered = true
+            manager.agents[0].terminalTitle = "some title"
+
+            manager.detachWorkspace(manager.workspaces[0])
+
+            #expect(manager.agents[0].state == .idle)
+            #expect(manager.agents[0].isRegistered == false)
+            #expect(manager.agents[0].terminalTitle == "")
+        }
+
+        @Test("reattachWorkspace clears isDetached flag")
+        @MainActor
+        func reattachWorkspaceClearsFlag() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws = manager.addWorkspace(name: "Test")
+            manager.detachWorkspace(ws)
+
+            manager.reattachWorkspace(manager.workspaces[0])
+
+            #expect(manager.workspaces[0].isDetachedFromMain == false)
+        }
+
+        @Test("reattachWorkspace switches main to reattached workspace")
+        @MainActor
+        func reattachWorkspaceSwitchesMain() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws1 = manager.addWorkspace(name: "First")
+            let ws2 = manager.addWorkspace(name: "Second")
+            manager.detachWorkspace(ws2)
+
+            #expect(manager.currentWorkspaceId == ws1.id)
+
+            manager.reattachWorkspace(manager.workspaces.first { $0.id == ws2.id }!)
+
+            #expect(manager.currentWorkspaceId == ws2.id)
+        }
+
+        @Test("reattachWorkspace bumps restartToken for all agents")
+        @MainActor
+        func reattachWorkspaceBumpsTokens() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 1)
+            manager.detachWorkspace(manager.workspaces[0])
+            let tokenAfterDetach = manager.agents[0].restartToken
+
+            manager.reattachWorkspace(manager.workspaces[0])
+
+            #expect(manager.agents[0].restartToken != tokenAfterDetach)
+        }
+
+        @Test("cycleWorkspace skips detached workspaces")
+        @MainActor
+        func cycleWorkspaceSkipsDetached() async {
+            let manager = AgentManagerTests.createTestManager()
+            let ws1 = manager.addWorkspace(name: "First")
+            let ws2 = manager.addWorkspace(name: "Second")
+            let ws3 = manager.addWorkspace(name: "Third")
+
+            manager.switchToWorkspace(ws1.id)
+            manager.detachWorkspace(ws2)
+
+            // Cycling from ws1 should skip ws2 (detached) and go to ws3
+            manager.cycleWorkspace()
+
+            #expect(manager.currentWorkspaceId == ws3.id)
+        }
+
+        @Test("workspace defaults to not detached")
+        @MainActor
+        func workspaceDefaultsToNotDetached() async {
+            let ws = Workspace(name: "Test")
+            #expect(ws.isDetachedFromMain == false)
+        }
+
+        @Test("detach then reattach round trip")
+        @MainActor
+        func detachReattachRoundTrip() async {
+            let manager = AgentManagerTests.setupManager(agentCount: 2)
+            let wsId = manager.workspaces[0].id
+
+            manager.detachWorkspace(manager.workspaces[0])
+            #expect(manager.attachedWorkspaces.isEmpty)
+            #expect(manager.detachedWorkspaces.count == 1)
+
+            manager.reattachWorkspace(manager.workspaces[0])
+            #expect(manager.attachedWorkspaces.count == 1)
+            #expect(manager.detachedWorkspaces.isEmpty)
+            #expect(manager.currentWorkspaceId == wsId)
+        }
+    }
 }

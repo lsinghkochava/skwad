@@ -177,4 +177,49 @@ final class WorkspaceTests: XCTestCase {
         let workspace = Workspace(name: "Test")
         XCTAssertNotEqual(workspace.id, UUID(uuidString: "00000000-0000-0000-0000-000000000000"))
     }
+
+    // MARK: - Detached State
+
+    func testDefaultIsNotDetached() {
+        let workspace = Workspace(name: "Test")
+        XCTAssertFalse(workspace.isDetachedFromMain)
+    }
+
+    func testIsDetachedFromMainSetterWorks() {
+        var workspace = Workspace(name: "Test")
+        workspace.isDetachedFromMain = true
+        XCTAssertTrue(workspace.isDetachedFromMain)
+    }
+
+    func testIsDetachedFromMainClearWorks() {
+        var workspace = Workspace(name: "Test", isDetached: true)
+        workspace.isDetachedFromMain = false
+        XCTAssertFalse(workspace.isDetachedFromMain)
+    }
+
+    func testDecodingOldWorkspaceWithoutIsDetachedDefaultsToFalse() throws {
+        // JSON without isDetached field (simulates old persisted data)
+        let json = """
+        {
+            "id": "12345678-1234-1234-1234-123456789ABC",
+            "name": "Legacy",
+            "colorHex": "#1B4FB2",
+            "agentIds": [],
+            "layoutMode": "single",
+            "activeAgentIds": [],
+            "focusedPaneIndex": 0,
+            "splitRatio": 0.5
+        }
+        """
+        let data = json.data(using: .utf8)!
+        let workspace = try JSONDecoder().decode(Workspace.self, from: data)
+        XCTAssertFalse(workspace.isDetachedFromMain)
+    }
+
+    func testEncodingDecodingPreservesDetachedState() throws {
+        let workspace = Workspace(name: "Detached", isDetached: true)
+        let data = try JSONEncoder().encode(workspace)
+        let decoded = try JSONDecoder().decode(Workspace.self, from: data)
+        XCTAssertTrue(decoded.isDetachedFromMain)
+    }
 }

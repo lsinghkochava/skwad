@@ -43,6 +43,7 @@ struct Workspace: Identifiable, Codable, Hashable {
     var splitRatio: CGFloat  // primary split ratio (kept for backwards compatibility, maps to splitRatioPrimary)
     var splitRatioSecondary: CGFloat?  // secondary split ratio - optional for backwards compatibility
     var showDashboard: Bool?  // whether to show workspace dashboard instead of sidebar+terminal
+    var isDetached: Bool?  // whether this workspace is detached to its own window
 
     /// Primary split ratio (vertical in splitVertical/grid, horizontal in splitHorizontal)
     var splitRatioPrimary: CGFloat {
@@ -65,7 +66,8 @@ struct Workspace: Identifiable, Codable, Hashable {
         focusedPaneIndex: Int = 0,
         splitRatio: CGFloat = 0.5,
         splitRatioSecondary: CGFloat? = nil,
-        showDashboard: Bool = false
+        showDashboard: Bool = false,
+        isDetached: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -77,12 +79,19 @@ struct Workspace: Identifiable, Codable, Hashable {
         self.splitRatio = splitRatio
         self.splitRatioSecondary = splitRatioSecondary
         self.showDashboard = showDashboard
+        self.isDetached = isDetached
     }
 
     /// Whether to show workspace dashboard (defaults to false for migration)
     var isDashboardVisible: Bool {
         get { showDashboard ?? false }
         set { showDashboard = newValue }
+    }
+
+    /// Whether this workspace is detached to its own window (defaults to false for migration)
+    var isDetachedFromMain: Bool {
+        get { isDetached ?? false }
+        set { isDetached = newValue }
     }
 
     var color: Color {

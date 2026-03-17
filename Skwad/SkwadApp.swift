@@ -300,8 +300,8 @@ struct SkwadApp: App {
                 }
                 .keyboardShortcut("0", modifiers: .command)
 
-                // Cmd+1-9 to switch workspaces
-                ForEach(Array(agentManager.workspaces.enumerated().prefix(9)), id: \.element.id) { index, workspace in
+                // Cmd+1-9 to switch attached workspaces
+                ForEach(Array(agentManager.attachedWorkspaces.enumerated().prefix(9)), id: \.element.id) { index, workspace in
                     Button(workspace.name) {
                         withAnimation(.easeInOut(duration: 0.25)) {
                             agentManager.showGlobalDashboard = false
