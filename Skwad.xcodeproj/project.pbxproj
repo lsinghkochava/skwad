@@ -54,6 +54,7 @@
 		8D8C030C2F54092100A06866 /* MarkdownToHTMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8C030B2F54092100A06866 /* MarkdownToHTMLTests.swift */; };
 		8DB21B7F2F57C75600BB9DFB /* PersonaSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB21B7D2F57C75600BB9DFB /* PersonaSheet.swift */; };
 		8DB21B802F57C75600BB9DFB /* PersonasSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB21B7E2F57C75600BB9DFB /* PersonasSettingsView.swift */; };
+		8DB5F95E2F74051F001A650E /* AgentPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB5F95D2F74051F001A650E /* AgentPrompts.swift */; };
 		8DBD63392F478DB40049E5DC /* AIProxy in Frameworks */ = {isa = PBXBuildFile; productRef = 8DBD63382F478DB40049E5DC /* AIProxy */; };
 		8DBD634E2F479A770049E5DC /* AutopilotSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DBD634D2F479A770049E5DC /* AutopilotSettingsView.swift */; };
 		8DBD63542F479B570049E5DC /* TerminalSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DBD63522F479B570049E5DC /* TerminalSettingsView.swift */; };
@@ -263,6 +264,7 @@
 		8D8C030B2F54092100A06866 /* MarkdownToHTMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownToHTMLTests.swift; sourceTree = "<group>"; };
 		8DB21B7D2F57C75600BB9DFB /* PersonaSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonaSheet.swift; sourceTree = "<group>"; };
 		8DB21B7E2F57C75600BB9DFB /* PersonasSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonasSettingsView.swift; sourceTree = "<group>"; };
+		8DB5F95D2F74051F001A650E /* AgentPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentPrompts.swift; sourceTree = "<group>"; };
 		8DBD634D2F479A770049E5DC /* AutopilotSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutopilotSettingsView.swift; sourceTree = "<group>"; };
 		8DBD634F2F479B570049E5DC /* CodingSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingSettingsView.swift; sourceTree = "<group>"; };
 		8DBD63502F479B570049E5DC /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
@@ -297,7 +299,6 @@
 		CH100003 /* CodexHookHandler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CodexHookHandler.swift; sourceTree = "<group>"; };
 		D7E037AD7B4E4328B3903C83 /* GitStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitStatsView.swift; sourceTree = "<group>"; };
 		E032A72A15B3456546418CF7 /* OpenWithProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenWithProvider.swift; sourceTree = "<group>"; };
-		E5BE6708C3DED645CDEA5889 /* AgentPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentPrompts.swift; sourceTree = "<group>"; };
 		EA63472ED8A96242C89019C1 /* DiffView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiffView.swift; sourceTree = "<group>"; };
 		F8000001 /* SkwadApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkwadApp.swift; sourceTree = "<group>"; };
 		F8000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -932,7 +933,7 @@
 		UT200000 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				E5BE6708C3DED645CDEA5889 /* AgentPrompts.swift */,
+				8DB5F95D2F74051F001A650E /* AgentPrompts.swift */,
 				8D6B97232F2DC47300CE877E /* AsyncDelay.swift */,
 				UT100006 /* AvatarUtils.swift */,
 				UT100001 /* Clipboard.swift */,
@@ -1167,6 +1168,7 @@
 				8DC767482F566EB00027458D /* SplitButton.swift in Sources */,
 				GH000013 /* GhosttyTerminalView.swift in Sources */,
 				GH000014 /* TerminalScrollView.swift in Sources */,
+				8DB5F95E2F74051F001A650E /* AgentPrompts.swift in Sources */,
 				UT000001 /* Clipboard.swift in Sources */,
 				UT000002 /* TerminalTextCleaner.swift in Sources */,
 				8DDBB07B2F5E62A20000173C /* AddAgentCardView.swift in Sources */,
@@ -1191,7 +1193,6 @@
 				914A53BB8DBD66EC96B19BDA /* GitPanelView.swift in Sources */,
 				01716FCA29A8F9522A2F8A9A /* GitFileWatcher.swift in Sources */,
 				3FFD4CA0073309E4B34E6B66 /* CommitSheet.swift in Sources */,
-				BFCA68A642CA20E48C856C12 /* AgentPrompts.swift in Sources */,
 				8D6B97252F2DC47300CE877E /* AsyncDelay.swift in Sources */,
 				8D6B97262F2DC47300CE877E /* TimingConstants.swift in Sources */,
 				FW000001 /* FileWatcher.swift in Sources */,
@@ -1422,7 +1423,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 129;
+				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1454,7 +1455,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 129;
+				CURRENT_PROJECT_VERSION = 130;
 				DEVELOPMENT_TEAM = S3Y2KVL7H7;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
