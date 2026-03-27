@@ -69,6 +69,7 @@
 		8DCB8BDC2F5DE27800A090B9 /* AgentCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BD82F5DE27800A090B9 /* AgentCardView.swift */; };
 		8DCB8BDD2F5DE27800A090B9 /* QuickPromptField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BD92F5DE27800A090B9 /* QuickPromptField.swift */; };
 		8DCB8BDE2F5DE27800A090B9 /* StatusSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DCB8BDA2F5DE27800A090B9 /* StatusSummaryView.swift */; };
+		AD100001 /* AddDirSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD100002 /* AddDirSheet.swift */; };
 		8DD8074D2F2E52E900D7A935 /* AgentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD8074C2F2E52E900D7A935 /* AgentSheet.swift */; };
 		8DDBB0772F5E2F900000173C /* HeaderTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB0762F5E2F900000173C /* HeaderTitleView.swift */; };
 		8DDBB0792F5E38EB0000173C /* DashboardSortPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DDBB0782F5E38EB0000173C /* DashboardSortPicker.swift */; };
@@ -156,6 +157,7 @@
 		TS000011 /* MockAgentDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100010 /* MockAgentDataProvider.swift */; };
 		TS000012 /* GitWorktreeManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100011 /* GitWorktreeManagerTests.swift */; };
 		TS000014 /* DiffViewHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100013 /* DiffViewHelpersTests.swift */; };
+		AD200001 /* AddDirSheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD200002 /* AddDirSheetTests.swift */; };
 		TS000015 /* AgentSheetHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100014 /* AgentSheetHelpersTests.swift */; };
 		TS000016 /* SidebarViewHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100015 /* SidebarViewHelpersTests.swift */; };
 		TS000017 /* ContentViewHelpersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS100016 /* ContentViewHelpersTests.swift */; };
@@ -279,6 +281,7 @@
 		8DCB8BD82F5DE27800A090B9 /* AgentCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCardView.swift; sourceTree = "<group>"; };
 		8DCB8BD92F5DE27800A090B9 /* QuickPromptField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickPromptField.swift; sourceTree = "<group>"; };
 		8DCB8BDA2F5DE27800A090B9 /* StatusSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusSummaryView.swift; sourceTree = "<group>"; };
+		AD100002 /* AddDirSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDirSheet.swift; sourceTree = "<group>"; };
 		8DD8074C2F2E52E900D7A935 /* AgentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSheet.swift; sourceTree = "<group>"; };
 		8DDBB0762F5E2F900000173C /* HeaderTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderTitleView.swift; sourceTree = "<group>"; };
 		8DDBB0782F5E38EB0000173C /* DashboardSortPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSortPicker.swift; sourceTree = "<group>"; };
@@ -371,6 +374,7 @@
 		TS100010 /* MockAgentDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAgentDataProvider.swift; sourceTree = "<group>"; };
 		TS100011 /* GitWorktreeManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitWorktreeManagerTests.swift; sourceTree = "<group>"; };
 		TS100013 /* DiffViewHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewHelpersTests.swift; sourceTree = "<group>"; };
+		AD200002 /* AddDirSheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDirSheetTests.swift; sourceTree = "<group>"; };
 		TS100014 /* AgentSheetHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSheetHelpersTests.swift; sourceTree = "<group>"; };
 		TS100015 /* SidebarViewHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewHelpersTests.swift; sourceTree = "<group>"; };
 		TS100016 /* ContentViewHelpersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewHelpersTests.swift; sourceTree = "<group>"; };
@@ -651,6 +655,7 @@
 		F8000017 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AD100002 /* AddDirSheet.swift */,
 				8D334BC72F35104700FB0E95 /* AgentContextMenu.swift */,
 				8DD8074C2F2E52E900D7A935 /* AgentSheet.swift */,
 				SR100002 /* AgentTypePicker.swift */,
@@ -848,6 +853,7 @@
 		TS500008 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AD200002 /* AddDirSheetTests.swift */,
 				TS100014 /* AgentSheetHelpersTests.swift */,
 				TS100035 /* AgentContextMenuTests.swift */,
 				TS100019 /* AvatarViewHelpersTests.swift */,
@@ -1135,6 +1141,7 @@
 				CH000002 /* ClaudeHookHandler.swift in Sources */,
 				CH000003 /* CodexHookHandler.swift in Sources */,
 				8D7622B02F2C67CE006B6280 /* MCPTransport.swift in Sources */,
+				AD100001 /* AddDirSheet.swift in Sources */,
 				8DD8074D2F2E52E900D7A935 /* AgentSheet.swift in Sources */,
 				8D7622B12F2C67CE006B6280 /* AgentCoordinator.swift in Sources */,
 				8D7622B22F2C67CE006B6280 /* MCPTypes.swift in Sources */,
@@ -1227,6 +1234,7 @@
 				TS000011 /* MockAgentDataProvider.swift in Sources */,
 				TS000012 /* GitWorktreeManagerTests.swift in Sources */,
 				TS000014 /* DiffViewHelpersTests.swift in Sources */,
+				AD200001 /* AddDirSheetTests.swift in Sources */,
 				TS000015 /* AgentSheetHelpersTests.swift in Sources */,
 				TS000016 /* SidebarViewHelpersTests.swift in Sources */,
 				1A6D2316079752BE51601C58 /* AgentRowViewUITests.swift in Sources */,

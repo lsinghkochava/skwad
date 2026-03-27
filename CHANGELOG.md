@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2026-03-27
+
+### Added
+- Cmd-Shift-P to add permissions to a folder (Claude only)
+
+### Changed
+- N/A
+
+### Fixed
+- N/A
+
+### Removed
+- N/A
+
+
 ## [1.8.2] - 2026-03-25
 
 ### Added

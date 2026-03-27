@@ -25,6 +25,7 @@ struct SkwadApp: App {
     @State private var forkPrefill: AgentPrefill?
     @State private var showDetachConfirmation = false
     @State private var suppressDetachWarning = false
+    @State private var showAddDirSheet = false
 
     private var settings: AppSettings { AppSettings.shared }
 
@@ -36,6 +37,14 @@ struct SkwadApp: App {
         guard !isAnyDashboardVisible,
               let agent = agentManager.agents.first(where: { $0.id == agentManager.activeAgentId }),
               !agent.isCompanion else { return nil }
+        return agent
+    }
+
+    private var activeClaudeAgent: Agent? {
+        guard let agent = activeAgentForMenu,
+              agent.agentType == "claude",
+              agent.state == .running || agent.state == .idle || agent.state == .input
+        else { return nil }
         return agent
     }
 
@@ -106,6 +115,12 @@ struct SkwadApp: App {
                 .sheet(item: $forkPrefill) { prefill in
                     AgentSheet(prefill: prefill)
                         .environment(agentManager)
+                }
+                .sheet(isPresented: $showAddDirSheet) {
+                    if let agent = activeClaudeAgent {
+                        AddDirSheet(agent: agent)
+                            .environment(agentManager)
+                    }
                 }
                 .sheet(isPresented: $showDetachConfirmation) {
                     if let workspace = agentManager.currentWorkspace {
@@ -237,6 +252,12 @@ struct SkwadApp: App {
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
                 .disabled(isAnyDashboardVisible || agentManager.activeAgentId == nil)
+
+                Button("Add Directory...") {
+                    showAddDirSheet = true
+                }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
+                .disabled(activeClaudeAgent == nil)
 
                 Divider()
 
