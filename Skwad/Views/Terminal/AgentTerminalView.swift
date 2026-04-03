@@ -221,11 +221,11 @@ struct AgentFullHeader: View {
                     .opacity(isUnfocusedInSplit ? Theme.unfocusedHeaderOpacity : 1.0)
             }
 
-            if showTitle, !agent.displayTitle.isEmpty {
+            if showTitle, !agent.headerTitle.isEmpty {
                 Text("●")
                     .font(.caption)
                     .foregroundColor(Theme.secondaryText)
-                Text(agent.displayTitle)
+                Text(agent.headerTitle)
                     .font(.title3)
                     .foregroundColor(Theme.secondaryText)
                     .lineLimit(1)
@@ -280,13 +280,13 @@ struct AgentCompactHeader: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
 
-            if !agent.displayTitle.isEmpty {
+            if !agent.headerTitle.isEmpty {
                 Text("•")
                     .font(.body)
                     .fontWeight(.bold)
                     .foregroundColor(Theme.secondaryText)
 
-                Text(agent.displayTitle)
+                Text(agent.headerTitle)
                     .font(.body)
                     .fontWeight(.bold)
                     .foregroundColor(Theme.secondaryText)

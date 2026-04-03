@@ -147,6 +147,11 @@ struct Agent: Identifiable, Codable, Hashable {
         terminalTitle
     }
 
+    /// Title for the terminal header: prefers agent-set status text over terminal title
+    var headerTitle: String {
+        statusText.isEmpty ? terminalTitle : statusText
+    }
+
     /// Check if avatar is an image (base64 encoded)
     var isImageAvatar: Bool {
         avatar?.hasPrefix("data:image") ?? false
